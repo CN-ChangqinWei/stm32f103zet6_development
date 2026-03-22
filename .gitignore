@@ -1,0 +1,59 @@
+# Build directories
+build/
+Build/
+Debug/
+Release/
+build-*/
+
+# STM32CubeMX generated files
+mx.scratch
+.mxproject
+
+# IDE settings (optional, uncomment if you want to share IDE config)
+# .settings/
+# .vscode/
+# .idea/
+
+# Compiled Object files
+*.o
+*.obj
+*.elf
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Binary files
+*.bin
+*.hex
+*.map
+*.lst
+
+# Debug files
+*.su
+*.idb
+*.pdb
+
+# Dependency files
+*.d
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Backup files
+*~
+*.swp
+*.swo
+*.bak
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
