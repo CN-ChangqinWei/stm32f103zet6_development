@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "servo_test.h"
+#include "stm32f1xx_hal_tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +96,17 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  GPIO_PinState key=GPIO_PIN_SET;
+  TIM_OC_InitTypeDef config={
+    .OCMode = TIM_OCMODE_TIMING,
+    .Pulse = 0,
+    .OCPolarity = TIM_OCPOLARITY_HIGH,
+    .OCNPolarity = TIM_OCNPOLARITY_HIGH,
+    .OCFastMode = TIM_OCFAST_DISABLE,
+    .OCIdleState = TIM_OCIDLESTATE_RESET,
+    .OCNIdleState = TIM_OCNIDLESTATE_RESET,
+  };
+  ServoTest(&htim1,config,TIM_CHANNEL_1);
+  
   while (1)
   {
     /* USER CODE END WHILE */
