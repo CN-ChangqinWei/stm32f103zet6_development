@@ -23,6 +23,7 @@ uint8_t ServoPowerOn(struct Servo* servo,uint32_t num,uint32_t den){
         HAL_GPIO_WritePin(servo->powerCtrlPort,servo->powerCtrlPin,GPIO_PIN_SET);
     }
     servo->isPowerOn = 1;
+    PWMStart(&servo->pwm);
     return ServoSetPosition(servo,num,den);
 }
 uint8_t ServoShutDown(struct Servo* servo){
@@ -36,6 +37,7 @@ uint8_t ServoShutDown(struct Servo* servo){
         HAL_GPIO_WritePin(servo->powerCtrlPort,servo->powerCtrlPin,GPIO_PIN_RESET);
     }
     servo->isPowerOn = 0;
+    PWMClose(&servo->pwm);
     return 0;
 }
 uint8_t ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){

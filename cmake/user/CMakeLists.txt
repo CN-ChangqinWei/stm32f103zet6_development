@@ -10,6 +10,7 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/Servo/Src/servo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/Servo/Src/servo_test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/PWM/Src/pwm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/PWM/Src/pwm_test.c
 
 )
 
