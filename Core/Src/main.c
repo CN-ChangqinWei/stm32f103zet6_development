@@ -18,8 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -98,10 +96,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    GPIO_PinState key1 = HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_4);
-    HAL_Delay(10);
-    if(key1==key) HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, key);
-    else key=key1;
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
