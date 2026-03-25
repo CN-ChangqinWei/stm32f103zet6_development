@@ -48,9 +48,13 @@ uint8_t ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
         }
         return 0;
     }
-    servo->num = num;
-    servo->den = den;
-    if(PWMSetByRate(&servo->pwm,num,den) != 0){
+    servo->num=num;
+    servo->den=den;
+    uint32_t xden = servo->den*10;
+    uint32_t xnum = servo->num+den/40;
+    
+    
+    if(PWMSetByRate(&servo->pwm,xnum,xden) != 0){
         return 1;
     }
     return 0;
