@@ -109,7 +109,7 @@ int main(void)
     .OCIdleState = TIM_OCIDLESTATE_RESET,
     .OCNIdleState = TIM_OCNIDLESTATE_RESET,
   };
-  PWMTest(&htim3,config,TIM_CHANNEL_2);
+  ServoTest(&htim1,config,TIM_CHANNEL_1);
   
   while (1)
   {

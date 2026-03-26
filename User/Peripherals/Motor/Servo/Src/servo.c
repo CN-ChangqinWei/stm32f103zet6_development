@@ -40,8 +40,9 @@ uint8_t ServoShutDown(struct Servo* servo){
     PWMClose(&servo->pwm);
     return 0;
 }
-uint8_t ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
-    if(servo == NULL || den == 0){
+uint8_t 
+ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
+    if(servo == NULL || den == 0||den<num){
         return 1;
     }
     if(!servo->isPowerOn){
@@ -52,8 +53,8 @@ uint8_t ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
     }
     servo->num=num;
     servo->den=den;
-    uint32_t xden = servo->den*10;
-    uint32_t xnum = servo->num+den/40;
+    uint32_t xden = servo->den*40;
+    uint32_t xnum = 4*servo->num+den;
     
     
     if(PWMSetByRate(&servo->pwm,xnum,xden) != 0){
