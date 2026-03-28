@@ -14,10 +14,13 @@ typedef struct{
     #ifdef HAL_DMA_MODULE_ENABLED
     DMA_HandleTypeDef* dmaTX;//如果dma不为0那么recvbuf和sendbuf
     DMA_HandleTypeDef* dmaRX;
+
     #endif
 
 } Serial ;
 extern Serial serial1;
+extern uint8_t recvBuf1[255];
+extern uint8_t sendBuf1[255];
 // Serial NewSerial(UART_HandleTypeDef* uart,
 //     uint8_t * recvBuf,
 //     uint32_t  recvLen,
@@ -35,6 +38,7 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     #ifdef HAL_DMA_MODULE_ENABLED
     ,DMA_HandleTypeDef* dmaTX,
     DMA_HandleTypeDef* dmaRX
+    
     #endif
 );
 

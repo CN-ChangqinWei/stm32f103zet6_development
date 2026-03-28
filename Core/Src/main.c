@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "serial.h"
+#include "serial_test.h"
 #include "servo_test.h"
 #include "pwm_test.h"
 #include "stm32f1xx_hal_tim.h"
@@ -114,7 +116,7 @@ int main(void)
     .OCNIdleState = TIM_OCNIDLESTATE_RESET,
   };
   ServoTest(&htim1,config,TIM_CHANNEL_1);
-  
+  SerialTest(&serial1);
   while (1)
   {
     /* USER CODE END WHILE */
@@ -329,7 +331,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-
+  serial1 = NewSerial(&huart1, recvBuf1, 255, sendBuf1, 255,NULL, NULL);
   /* USER CODE END USART1_Init 2 */
 
 }

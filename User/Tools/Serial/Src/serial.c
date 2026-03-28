@@ -1,7 +1,8 @@
 #include"serial.h"
 
-Serial seria1;
-
+Serial serial1;
+uint8_t recvBuf1[255]={0};
+uint8_t sendBuf1[255]={0};
 Serial NewSerial(UART_HandleTypeDef* uart,
     uint8_t * recvBuf,
     uint32_t  recvLen,
