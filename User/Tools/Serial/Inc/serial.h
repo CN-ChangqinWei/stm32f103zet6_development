@@ -5,6 +5,7 @@
 typedef struct{
     UART_HandleTypeDef* uart;
     uint8_t * recvBuf;//接收数组的指针
+    uint32_t  recvCur;
     uint32_t  recvLen;//接收数组的长度
     uint8_t * sendBuf;//发送数组的指针
     uint32_t  sendLen;//发送数组的长度
@@ -42,7 +43,8 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     #endif
 );
 
-
+void SerialStartRecvIT(Serial* serial);
+uint8_t SerialRecvIT(Serial* serial);
 uint8_t SerialsInit();
 void    SerialHandler(Serial* serial);
 uint8_t SerialSetRecvBuf(Serial* serial,uint8_t* buf, uint32_t len);

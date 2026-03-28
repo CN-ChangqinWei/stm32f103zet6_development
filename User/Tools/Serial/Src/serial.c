@@ -30,24 +30,45 @@ uint8_t SerialsInit(){
 
     return 0;
 }
-void  SerialHandler(Serial* serial){
-    uint32_t tmp_flag = 0;
-	uint32_t temp;
-	tmp_flag =__HAL_UART_GET_FLAG(serial->uart,UART_FLAG_IDLE); //获取IDLE标志位
-	if((tmp_flag != RESET))//idle标志被置位
-	{ 
-		__HAL_UART_CLEAR_IDLEFLAG(serial->uart);//清除标志位
-		//temp = huart1.Instance->SR;  //清除状态寄存器SR,读取SR寄存器可以实现清除SR寄存器的功能
-		//temp = huart1.Instance->DR; //读取数据寄存器中的数据
-		//这两句和上面那句等效
-		HAL_UART_DMAStop(serial->uart); //
-		temp  =  __HAL_DMA_GET_COUNTER(serial->dmaRX);// 获取DMA中未传输的数据个数   
-		//temp  = hdma_usart1_rx.Instance->NDTR;//读取NDTR寄存器 获取DMA中未传输的数据个数，
-		//这句和上面那句等效
-		serial->rxLen =  serial->recvLen - temp; //总计数减去未传输的数据个数，得到已经接收的数据个数
-		serial->recvFinishFlag = 1;	// 接受完成标志位置1	
-	 }
+
+void SerialStartRecvIT(Serial* serial){
+   HAL_UART_Receive_IT(serial->uart,serial->recvBuf,1);
+   serial->recvCur++;
+   serial->recvCur%=serial->recvLen;
 }
+uint8_t SerialRecvIT(Serial* serial){
+    uint8_t data=serial->recvBuf[serial->recvCur++];
+    serial->recvCur%=serial->recvLen;
+    HAL_UART_Receive_IT(serial->uart,serial->recvBuf+serial->recvCur,1);
+    
+    return data;
+}
+
+
+void  SerialHandler(Serial* serial){
+    // uint32_t tmp_flag = 0;
+	// uint32_t temp;
+	// tmp_flag =__HAL_UART_GET_FLAG(serial->uart,UART_FLAG_IDLE); //获取IDLE标志位
+	// if((tmp_flag != RESET))//idle标志被置位
+	// { 
+	// 	__HAL_UART_CLEAR_IDLEFLAG(serial->uart);//清除标志位
+	// 	//temp = huart1.Instance->SR;  //清除状态寄存器SR,读取SR寄存器可以实现清除SR寄存器的功能
+	// 	//temp = huart1.Instance->DR; //读取数据寄存器中的数据
+	// 	//这两句和上面那句等效
+	// 	//HAL_UART_DMAStop(serial->uart); //
+	// 	//temp  =  __HAL_DMA_GET_COUNTER(serial->dmaRX);// 获取DMA中未传输的数据个数   
+	// 	//temp  = hdma_usart1_rx.Instance->NDTR;//读取NDTR寄存器 获取DMA中未传输的数据个数，
+	// 	//这句和上面那句等效
+	// 	serial->rxLen =  serial->recvLen - temp; //总计数减去未传输的数据个数，得到已经接收的数据个数
+	// 	serial->recvFinishFlag = 1;	// 接受完成标志位置1	
+	//  }
+    uint8_t data = SerialRecvIT(serial);
+    SerialSendUseOtherBuf(serial,&data,1);
+}
+
+
+
+
 uint8_t SerialSetRecvBuf(Serial* serial, uint8_t* buf, uint32_t len){
     if(serial == NULL || buf == NULL) return 1;
     serial->recvBuf = buf;
@@ -125,4 +146,12 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
         HAL_UART_Receive(serial->uart, buf, len, HAL_MAX_DELAY);
     }
     return len;
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart == serial1.uart) {
+        // 在这里处理接收到的数据
+       SerialHandler(&serial1);
+    }
 }
