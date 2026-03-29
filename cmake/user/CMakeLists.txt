@@ -4,6 +4,7 @@ set(USER_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/PWM/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/Serial/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/Router/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Serivces
 )
 
 set(USER_Application_Src
