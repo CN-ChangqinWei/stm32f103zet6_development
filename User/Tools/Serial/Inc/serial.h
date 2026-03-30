@@ -45,6 +45,7 @@ Serial NewSerial(UART_HandleTypeDef* uart,
 
 void SerialStartRecvIT(Serial* serial);
 uint8_t SerialRecvIT(Serial* serial);
+uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout);
 uint8_t SerialsInit();
 void    SerialHandler(Serial* serial);
 uint8_t SerialSetRecvBuf(Serial* serial,uint8_t* buf, uint32_t len);

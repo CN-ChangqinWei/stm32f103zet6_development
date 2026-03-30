@@ -44,24 +44,21 @@ uint8_t SerialRecvIT(Serial* serial){
     return data;
 }
 
+uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout) {
+    if (serial == NULL || buf == NULL || len == 0 || serial->uart == NULL) return NULL;
+    
+    HAL_StatusTypeDef status = HAL_UART_Receive(serial->uart, buf, len, timeout);
+    
+    if (status == HAL_OK) {
+        serial->rxLen = len;
+        serial->recvFinishFlag = 1;
+        return buf;
+    }
+    
+    return NULL;
+}
 
 void  SerialHandler(Serial* serial){
-    // uint32_t tmp_flag = 0;
-	// uint32_t temp;
-	// tmp_flag =__HAL_UART_GET_FLAG(serial->uart,UART_FLAG_IDLE); //获取IDLE标志位
-	// if((tmp_flag != RESET))//idle标志被置位
-	// { 
-	// 	__HAL_UART_CLEAR_IDLEFLAG(serial->uart);//清除标志位
-	// 	//temp = huart1.Instance->SR;  //清除状态寄存器SR,读取SR寄存器可以实现清除SR寄存器的功能
-	// 	//temp = huart1.Instance->DR; //读取数据寄存器中的数据
-	// 	//这两句和上面那句等效
-	// 	//HAL_UART_DMAStop(serial->uart); //
-	// 	//temp  =  __HAL_DMA_GET_COUNTER(serial->dmaRX);// 获取DMA中未传输的数据个数   
-	// 	//temp  = hdma_usart1_rx.Instance->NDTR;//读取NDTR寄存器 获取DMA中未传输的数据个数，
-	// 	//这句和上面那句等效
-	// 	serial->rxLen =  serial->recvLen - temp; //总计数减去未传输的数据个数，得到已经接收的数据个数
-	// 	serial->recvFinishFlag = 1;	// 接受完成标志位置1	
-	//  }
     uint8_t data = SerialRecvIT(serial);
     SerialSendUseOtherBuf(serial,&data,1);
 }
