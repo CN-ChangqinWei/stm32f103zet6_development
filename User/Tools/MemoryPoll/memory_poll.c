@@ -7,31 +7,6 @@ void MemoryPollInit(){
     manager.remain=_MEMORY_POLL_MAX_BYTE;
     manager.isInit=1;
 }
-void* MemoryPollAlloc(int size){
-    if(manager.remain<size) return 0;
-    if(manager.cnt>=_MEMORY_POLL_MAX_UNIT) return 0;
-    if(manager.unitCur>=_MEMORY_POLL_MAX_UNIT) UnitsMigration();
-    if(manager.end+size>_MEMORY_POLL_MAX_BYTE) MemoryMigration();
-    char* res = manager.startAddr+manager.end;
-    manager.units[manager.unitCur].len=size;
-    manager.units[manager.unitCur++].start=res;
-    manager.cnt++;
-    manager.remain-=size;
-    manager.end+=size;
-    return res;
-}
-char MemoryPollFree(void* buf){
-    for(int i=0;i<_MEMORY_POLL_MAX_UNIT;i++){
-        if(manager.units[i].start==buf){
-            int*len=&manager.units[i].len;
-            manager.remain+=*len;
-            manager.cnt--;
-            *len=0;
-            return 0;
-        }
-    }
-    return 1;
-}
 static void UnitsMigration(){
     int cur=0;
     MemoryUnit *unitArry = manager.units;
@@ -61,4 +36,30 @@ static void MemoryMigration(){
     }
     manager.end=memCur-manager.startAddr;
 }
+void* MemoryPollAlloc(int size){
+    if(manager.remain<size) return 0;
+    if(manager.cnt>=_MEMORY_POLL_MAX_UNIT) return 0;
+    if(manager.unitCur>=_MEMORY_POLL_MAX_UNIT) UnitsMigration();
+    if(manager.end+size>_MEMORY_POLL_MAX_BYTE) MemoryMigration();
+    char* res = manager.startAddr+manager.end;
+    manager.units[manager.unitCur].len=size;
+    manager.units[manager.unitCur++].start=res;
+    manager.cnt++;
+    manager.remain-=size;
+    manager.end+=size;
+    return res;
+}
+char MemoryPollFree(void* buf){
+    for(int i=0;i<_MEMORY_POLL_MAX_UNIT;i++){
+        if(manager.units[i].start==buf){
+            int*len=&manager.units[i].len;
+            manager.remain+=*len;
+            manager.cnt--;
+            *len=0;
+            return 0;
+        }
+    }
+    return 1;
+}
+
 

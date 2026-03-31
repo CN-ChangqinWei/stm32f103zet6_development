@@ -29,6 +29,6 @@ uint32_t SerialCommRecv(void* instance, uint8_t* data, uint32_t len);
 CommInterface GetSerialCommInterface(void);
 
 // 便捷函数：直接使用 Serial 创建 Communication 对象
-Communication NewCommunicationFromSerial(Serial* serial);
+Communication NewCommunicationFromSerial(SerialComm* serial);
 
 #endif

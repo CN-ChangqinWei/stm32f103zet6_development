@@ -73,10 +73,6 @@ void CommSendPackage(Communication* comm, uint8_t* data, int len) {
 }
 
 void CommHandler(Communication* comm){
-    int len;
-    uint8_t* data=CommRecvPackage(comm,&len);
-    int protocol = *((int*)data);
-    Task tk = {protocol,data};
-    RouterAddTask(tk);
+    
 }
 
