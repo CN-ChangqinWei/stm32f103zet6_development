@@ -1,4 +1,5 @@
 #include "communication.h"
+#include "router.h"
 #include <string.h>
 
 Communication NewCommunication(void* instance, CommInterface interface) {
@@ -70,3 +71,12 @@ void CommSendPackage(Communication* comm, uint8_t* data, int len) {
     // 再发数据
     comm->interface.send(comm->instance, data, len);
 }
+
+void CommHandler(Communication* comm){
+    int len;
+    uint8_t* data=CommRecvPackage(comm,&len);
+    int protocol = *((int*)data);
+    Task tk = {protocol,data};
+    RouterAddTask(tk);
+}
+

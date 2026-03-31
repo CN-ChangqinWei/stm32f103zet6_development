@@ -27,7 +27,6 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     return serial;
 }
 uint8_t SerialsInit(){
-
     return 0;
 }
 

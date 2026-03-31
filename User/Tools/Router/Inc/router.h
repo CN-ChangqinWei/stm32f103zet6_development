@@ -21,5 +21,7 @@ uint8_t RouterInit();//初始化全局router单例
 uint8_t RouterExec();
 uint8_t RouterRegister(uint32_t protocol,RouterHandler handler);//注册handler
 uint8_t RouterAddTask(Task tk);
+void    RouterAnlyPackage(void*,int len);
 void    RouterStopExec();
+
 #endif

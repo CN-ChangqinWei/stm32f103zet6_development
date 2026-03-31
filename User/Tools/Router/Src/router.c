@@ -1,4 +1,5 @@
 #include"router.h"
+#include"memory_poll.h"
 static Router router={0};
 uint8_t RouterInit(){
 
@@ -9,9 +10,11 @@ uint8_t RouterExec(){
     {
         if(router.taskHeadCur!=router.taskTailCur){
             Task tk=router.taskQue[router.taskHeadCur];
-            tk.handler(tk.arg);
+            
+            if(tk.handler!=NULL)tk.handler(tk.arg);
             router.taskHeadCur++;
             router.taskHeadCur%=_ROUTER_MAX_TASK_CNT;
+            MemoryPollFree(tk.arg);
         }
     }
     
@@ -28,5 +31,10 @@ uint8_t RouterAddTask(Task tk){
     router.taskTailCur++;
     router.taskTailCur%=_ROUTER_MAX_TASK_CNT+1;
 }
-
+void  RouterAnlyPackage(void*package,int len){
+    int protocol = *((int*)package);
+    RouterHandler handler = router.handlers[protocol];
+    Task tk ={handler,package};
+    RouterAddTask(tk);
+}
 

@@ -26,6 +26,7 @@
 #include "servo_test.h"
 #include "pwm_test.h"
 #include "stm32f1xx_hal_tim.h"
+#include "service.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -119,11 +120,13 @@ int main(void)
   //   .OCNIdleState = TIM_OCNIDLESTATE_RESET,
   // };
   // ServoTest(&htim1,config,TIM_CHANNEL_1);
-  SerialTest(&serial1);
+  //SerialTest(&serial1);
+  serial1=NewSerial(&huart2,recvBuf1,255,sendBuf1,255,0,0);
+  SerivceInit();
   while (1)
   {
     /* USER CODE END WHILE */
-
+    ServiceExec();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
