@@ -20,6 +20,6 @@ typedef struct{
 Communication NewCommunication(void* instance,CommInterface interface);
 void * CommRecvPackage(Communication* comm,int*len);
 void   CommSendPackage(Communication* comm,uint8_t* data,int len);
-
+void   CommHandler(Communication* comm);
 
 #endif

@@ -1,15 +1,12 @@
 #include "serial_comm.h"
 
-SerialComm* NewSerialComm(Serial* serial) {
-    if (serial == NULL) return NULL;
+SerialComm NewSerialComm(Serial* serial) {
     
-    SerialComm* serialComm = (SerialComm*)MemoryPollAlloc(sizeof(SerialComm));
-    if (serialComm == NULL) return NULL;
-    
-    serialComm->serial = serial;
-    serialComm->tempRecvBuf = NULL;
-    serialComm->tempRecvLen = 0;
-    serialComm->tempRecvCur = 0;
+    SerialComm serialComm ;
+    serialComm.serial = serial;
+    serialComm.tempRecvBuf = NULL;
+    serialComm.tempRecvLen = 0;
+    serialComm.tempRecvCur = 0;
     
     return serialComm;
 }
@@ -53,18 +50,14 @@ CommInterface GetSerialCommInterface(void) {
     return interface;
 }
 
-Communication NewCommunicationFromSerial(Serial* serial) {
+Communication NewCommunicationFromSerial(SerialComm* instance) {
     Communication comm = {0};
     
-    if (serial == NULL) return comm;
-    
-    // 创建 SerialComm 对象作为 instance
-    SerialComm* serialComm = NewSerialComm(serial);
-    if (serialComm == NULL) return comm;
+    if (instance == NULL) return comm;
     
     // 设置接口
     comm.interface = GetSerialCommInterface();
-    comm.instance = serialComm;
+    comm.instance = instance;
     comm.statu = MODE_LEN;
     comm.recvLen = 0;
     comm.packageBuf = NULL;

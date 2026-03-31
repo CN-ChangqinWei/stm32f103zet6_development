@@ -14,7 +14,7 @@ typedef struct {
 } SerialComm;
 
 // 创建 SerialComm 对象
-SerialComm* NewSerialComm(Serial* serial);
+SerialComm NewSerialComm(Serial* serial);
 
 // 销毁 SerialComm 对象
 void DeleteSerialComm(SerialComm* serialComm);
