@@ -21,5 +21,5 @@ typedef struct{
 void MemoryPollInit();
 void* MemoryPollAlloc(int size);
 char MemoryPollFree(void* buf);
-
+void* MemoryPollAllocPlus(int size,MemoryUnit** unit);
 #endif

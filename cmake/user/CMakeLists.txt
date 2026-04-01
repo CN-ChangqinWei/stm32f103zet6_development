@@ -12,6 +12,7 @@ set(USER_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Doamin
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Usage
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer
 )
 
 set(USER_Application_Src
@@ -29,6 +30,7 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/service.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Usage/health_service.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm/health_comm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer/ring_buf.c
 )
 
 

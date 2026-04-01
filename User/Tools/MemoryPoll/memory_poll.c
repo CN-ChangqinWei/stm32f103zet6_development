@@ -49,6 +49,22 @@ void* MemoryPollAlloc(int size){
     manager.end+=size;
     return res;
 }
+
+void* MemoryPollAllocPlus(int size,MemoryUnit** unit){
+    if(manager.remain<size) return 0;
+    if(manager.cnt>=_MEMORY_POLL_MAX_UNIT) return 0;
+    if(manager.unitCur>=_MEMORY_POLL_MAX_UNIT) UnitsMigration();
+    if(manager.end+size>_MEMORY_POLL_MAX_BYTE) MemoryMigration();
+    char* res = manager.startAddr+manager.end;
+    *unit=&manager.units[manager.unitCur];
+    manager.units[manager.unitCur].len=size;
+    manager.units[manager.unitCur++].start=res;
+    manager.cnt++;
+    manager.remain-=size;
+    manager.end+=size;
+    return res;
+}
+
 char MemoryPollFree(void* buf){
     for(int i=0;i<_MEMORY_POLL_MAX_UNIT;i++){
         if(manager.units[i].start==buf){

@@ -1,11 +1,12 @@
 #include"serial.h"
 
 Serial serial1;
-uint8_t recvBuf1[255]={0};
-uint8_t sendBuf1[255]={0};
+uint8_t recvBuf1[_SERIAL_BUF_SIZE]={0};
+uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
 Serial NewSerial(UART_HandleTypeDef* uart,
     uint8_t * recvBuf,
     uint32_t  recvLen,
+    uint32_t  curHead,
     uint8_t * sendBuf,
     uint32_t  sendLen
     #ifdef HAL_DMA_MODULE_ENABLED
@@ -17,6 +18,7 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     serial.uart = uart;
     serial.recvBuf = recvBuf;
     serial.recvLen = recvLen;
+    
     serial.sendBuf = sendBuf;
     serial.sendLen = sendLen;
     //SerialStartRecvIT(&serial);

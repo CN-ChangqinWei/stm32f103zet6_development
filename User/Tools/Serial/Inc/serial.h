@@ -1,7 +1,7 @@
 #ifndef _SERIAL_H
 #define _SERIAL_H
 #include "stm32f1xx_hal.h"
-
+#define _SERIAL_BUF_SIZE    255
 typedef struct{
     UART_HandleTypeDef* uart;
     uint8_t * recvBuf;//接收数组的指针
