@@ -19,7 +19,7 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     serial.recvLen = recvLen;
     serial.sendBuf = sendBuf;
     serial.sendLen = sendLen;
-    
+    //SerialStartRecvIT(&serial);
     #ifdef HAL_DMA_MODULE_ENABLED
     serial.dmaTX = dmaTX;
     serial.dmaRX=dmaRX;
@@ -31,9 +31,13 @@ uint8_t SerialsInit(){
 }
 
 void SerialStartRecvIT(Serial* serial){
-   HAL_UART_Receive_IT(serial->uart,serial->recvBuf,1);
-   serial->recvCur++;
-   serial->recvCur%=serial->recvLen;
+   __HAL_UART_ENABLE_IT(serial->uart, UART_IT_RXNE);
+   __HAL_UART_ENABLE_IT(serial->uart, UART_IT_IDLE);
+//    serial->recvCur++;
+//    serial->recvCur%=serial->recvLen;
+}
+void SerialStopRecvIT(Serial* serial){
+    __HAL_UART_DISABLE_IT(serial->uart,UART_IT_RXNE);
 }
 uint8_t SerialRecvIT(Serial* serial){
     uint8_t data=serial->recvBuf[serial->recvCur++];
@@ -45,7 +49,7 @@ uint8_t SerialRecvIT(Serial* serial){
 
 uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout) {
     if (serial == NULL || buf == NULL || len == 0 || serial->uart == NULL) return NULL;
-    
+    SerialStopRecvIT(serial);
     HAL_StatusTypeDef status = HAL_UART_Receive(serial->uart, buf, len, timeout);
     
     if (status == HAL_OK) {
@@ -54,6 +58,7 @@ uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t ti
         return buf;
     }
     
+    SerialStartRecvIT(serial);
     return NULL;
 }
 
@@ -144,10 +149,4 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
     return len;
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart == serial1.uart) {
-        // 在这里处理接收到的数据
-       SerialHandler(&serial1);
-    }
-}
+

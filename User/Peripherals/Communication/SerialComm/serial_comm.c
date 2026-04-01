@@ -1,4 +1,5 @@
 #include "serial_comm.h"
+#include "serial.h"
 
 SerialComm NewSerialComm(Serial* serial) {
     
@@ -7,7 +8,7 @@ SerialComm NewSerialComm(Serial* serial) {
     serialComm.tempRecvBuf = NULL;
     serialComm.tempRecvLen = 0;
     serialComm.tempRecvCur = 0;
-    
+    //SerialStartRecvIT(serial);
     return serialComm;
 }
 

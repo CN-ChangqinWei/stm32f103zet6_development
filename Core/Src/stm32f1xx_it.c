@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "serial.h"
+#include "service.h"
+#include "stm32f1xx_hal_gpio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -220,7 +222,7 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-  
+  ServiceCommHanlder();
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -229,5 +231,12 @@ void USART2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart == serial1.uart) {
+        // 在这里处理接收到的数据
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, !HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5));
+      ServiceCommHanlder();
+    }
+}
 /* USER CODE END 1 */

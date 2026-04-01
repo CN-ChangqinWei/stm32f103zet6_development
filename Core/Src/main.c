@@ -123,6 +123,7 @@ int main(void)
   //SerialTest(&serial1);
   serial1=NewSerial(&huart2,recvBuf1,255,sendBuf1,255,0,0);
   SerivceInit();
+  
   while (1)
   {
     /* USER CODE END WHILE */
