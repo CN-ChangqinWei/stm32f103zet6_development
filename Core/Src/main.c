@@ -133,7 +133,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_INIT */
   /* 初始化必须在调度器启动前完成 */
-  serial1 = NewSerial(&huart2, recvBuf1, 255, sendBuf1, 255, 0, 0);
+  serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, 0);
   SerivceInit();
   /* USER CODE END RTOS_INIT */
 

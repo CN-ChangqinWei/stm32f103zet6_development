@@ -1,12 +1,10 @@
 #include"serial.h"
+#include"memory_poll.h"
 
 Serial serial1;
-uint8_t recvBuf1[_SERIAL_BUF_SIZE]={0};
 uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
 Serial NewSerial(UART_HandleTypeDef* uart,
-    uint8_t * recvBuf,
-    uint32_t  recvLen,
-    uint32_t  curHead,
+    int       recvBufSize,
     uint8_t * sendBuf,
     uint32_t  sendLen
     #ifdef HAL_DMA_MODULE_ENABLED
@@ -16,12 +14,9 @@ Serial NewSerial(UART_HandleTypeDef* uart,
 ){
     Serial serial={0};
     serial.uart = uart;
-    serial.recvBuf = recvBuf;
-    serial.recvLen = recvLen;
-    
+    serial.recvRingBuf = NewRingBuf(recvBufSize);
     serial.sendBuf = sendBuf;
     serial.sendLen = sendLen;
-    //SerialStartRecvIT(&serial);
     #ifdef HAL_DMA_MODULE_ENABLED
     serial.dmaTX = dmaTX;
     serial.dmaRX=dmaRX;
@@ -33,49 +28,58 @@ uint8_t SerialsInit(){
 }
 
 void SerialStartRecvIT(Serial* serial){
-   __HAL_UART_ENABLE_IT(serial->uart, UART_IT_RXNE);
-   __HAL_UART_ENABLE_IT(serial->uart, UART_IT_IDLE);
-//    serial->recvCur++;
-//    serial->recvCur%=serial->recvLen;
+    if(serial == NULL || serial->uart == NULL) return;
+    HAL_UART_Receive_IT(serial->uart, &serial->rxTmp, 1);
 }
 void SerialStopRecvIT(Serial* serial){
-    __HAL_UART_DISABLE_IT(serial->uart,UART_IT_RXNE);
+    if(serial == NULL || serial->uart == NULL) return;
+    HAL_UART_AbortReceive_IT(serial->uart);
 }
+
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+//     if(huart == serial1.uart){
+//         RingBufAddByte(&serial1.recvRingBuf, serial1.rxTmp);
+//         HAL_UART_Receive_IT(serial1.uart, &serial1.rxTmp, 1);
+//     }
+// }
+
 uint8_t SerialRecvIT(Serial* serial){
-    uint8_t data=serial->recvBuf[serial->recvCur++];
-    serial->recvCur%=serial->recvLen;
-    HAL_UART_Receive_IT(serial->uart,serial->recvBuf+serial->recvCur,1);
-    
-    return data;
+    return RingBufPop(&serial->recvRingBuf);
 }
 
 uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout) {
     if (serial == NULL || buf == NULL || len == 0 || serial->uart == NULL) return NULL;
-    //SerialStopRecvIT(serial);
+    SerialStopRecvIT(serial);
     HAL_StatusTypeDef status = HAL_UART_Receive(serial->uart, buf, len, timeout);
     
     if (status == HAL_OK) {
         serial->rxLen = len;
         serial->recvFinishFlag = 1;
+        SerialStartRecvIT(serial);
         return buf;
     }
     
-    //SerialStartRecvIT(serial);
+    SerialStartRecvIT(serial);
     return NULL;
 }
 
 void  SerialHandler(Serial* serial){
+    if(serial == NULL || serial->recvRingBuf.len == 0) return;
     uint8_t data = SerialRecvIT(serial);
-    SerialSendUseOtherBuf(serial,&data,1);
 }
 
 
 
 
-uint8_t SerialSetRecvBuf(Serial* serial, uint8_t* buf, uint32_t len){
-    if(serial == NULL || buf == NULL) return 1;
-    serial->recvBuf = buf;
-    serial->recvLen = len;
+uint8_t SerialSetRecvBuf(Serial* serial, int size){
+    if(serial == NULL || size <= 0) return 1;
+    SerialStopRecvIT(serial);
+    if(serial->recvRingBuf.unit != NULL) {
+        MemoryPollFree(serial->recvRingBuf.unit->start);
+        MemoryPollFree(serial->recvRingBuf.unit);
+    }
+    serial->recvRingBuf = NewRingBuf(size);
+    SerialStartRecvIT(serial);
     return 0;
 }
 
@@ -102,17 +106,29 @@ uint32_t SerialSend(Serial* serial, uint32_t len){
 }
 
 uint32_t SerialRecv(Serial* serial){
-    if(serial == NULL || serial->recvBuf == NULL || serial->uart == NULL) return 0;
+    if(serial == NULL || serial->uart == NULL) return 0;
     
+    uint32_t recvLen = 0;
     #ifdef HAL_DMA_MODULE_ENABLED
     if(serial->dmaRX != NULL) {
-        HAL_UART_Receive_DMA(serial->uart, serial->recvBuf, serial->recvLen);
+        uint8_t tmpBuf[_SERIAL_BUF_SIZE];
+        recvLen = HAL_UART_Receive_DMA(serial->uart, tmpBuf, _SERIAL_BUF_SIZE);
+        for(uint32_t i = 0; i < recvLen; i++) {
+            RingBufAddByte(&serial->recvRingBuf, tmpBuf[i]);
+        }
     } else
     #endif
     {
-        HAL_UART_Receive(serial->uart, serial->recvBuf, serial->recvLen, HAL_MAX_DELAY);
+        uint8_t tmpBuf[_SERIAL_BUF_SIZE];
+        HAL_StatusTypeDef status = HAL_UART_Receive(serial->uart, tmpBuf, _SERIAL_BUF_SIZE, HAL_MAX_DELAY);
+        if(status == HAL_OK) {
+            recvLen = _SERIAL_BUF_SIZE;
+            for(uint32_t i = 0; i < recvLen; i++) {
+                RingBufAddByte(&serial->recvRingBuf, tmpBuf[i]);
+            }
+        }
     }
-    return serial->recvLen;
+    return recvLen;
 }
 
 uint32_t SerialSendUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
@@ -136,10 +152,6 @@ uint32_t SerialSendUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
 uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
     if(serial == NULL || buf == NULL || serial->uart == NULL) return 0;
     
-    if(buf == serial->recvBuf) {
-        return SerialRecv(serial);
-    }
-    
     #ifdef HAL_DMA_MODULE_ENABLED
     if(serial->dmaRX != NULL) {
         HAL_UART_Receive_DMA(serial->uart, buf, len);
@@ -148,7 +160,19 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
     {
         HAL_UART_Receive(serial->uart, buf, len, HAL_MAX_DELAY);
     }
+    
+    for(uint32_t i = 0; i < len; i++) {
+        RingBufAddByte(&serial->recvRingBuf, buf[i]);
+    }
     return len;
 }
 
+int      SerialBufLen(Serial* serial){
+    if(serial == NULL || serial->recvRingBuf.unit == NULL) return 0;
+    return serial->recvRingBuf.len;
+}//获取对应serial实体缓冲区剩余数据的字节数
 
+uint32_t SerialReadBytes(Serial* serial,char* buf,int len){
+    if(serial == NULL || buf == NULL || len <= 0 || serial->recvRingBuf.unit == NULL) return 0;
+    return RingBufRead(&serial->recvRingBuf, buf, len);
+}//获取指定长度数据到buf,返回值是实际长度

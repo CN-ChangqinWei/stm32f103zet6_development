@@ -13,6 +13,6 @@ RingBuf NewRingBuf(int size);
 uint8_t RingBufAddByte(RingBuf*ring,char byte);//尾部添加一个字节,长度不够那么直接弹出头部，返回值为是否插入成功
 uint8_t RingBufAddData(RingBuf*ring,char* data,int len);//尾部添加指定区域数据,长度不够那么直接弹出头部，返回值为是否插入成功
 char    RingBufPop(RingBuf*ring);//弹出头部字节
-uint8_t RingBufRead(RingBuf*ring,char* buf,int len);//弹出头部多个数据并且复制到指定buf
+uint32_t RingBufRead(RingBuf*ring,char* buf,int len);//弹出头部多个数据并且复制到指定buf
 
 #endif

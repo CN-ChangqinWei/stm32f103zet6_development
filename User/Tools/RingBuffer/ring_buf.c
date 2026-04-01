@@ -66,7 +66,7 @@ char RingBufPop(RingBuf* ring)
     return byte;
 }
 
-uint8_t RingBufRead(RingBuf* ring, char* buf, int len)
+uint32_t RingBufRead(RingBuf* ring, char* buf, int len)
 {
     if (ring == NULL || ring->unit == NULL || ring->unit->start == NULL || buf == NULL || len <= 0) {
         return 0;
