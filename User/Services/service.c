@@ -17,8 +17,9 @@ void ServiceExec(){
     RouterExec();
 }
 void ServiceCommHanlder(){
-    int len;
+    int len=0;
     char* buf=CommRecvPackage(&service.listener,&len);
+    if(NULL==buf) return;
     RouterAnlyPackage(buf,len);
     CommSendPackage(&service.listener,buf,len);
 }

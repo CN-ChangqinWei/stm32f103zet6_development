@@ -49,7 +49,7 @@ uint8_t SerialRecvIT(Serial* serial){
 
 uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout) {
     if (serial == NULL || buf == NULL || len == 0 || serial->uart == NULL) return NULL;
-    SerialStopRecvIT(serial);
+    //SerialStopRecvIT(serial);
     HAL_StatusTypeDef status = HAL_UART_Receive(serial->uart, buf, len, timeout);
     
     if (status == HAL_OK) {
@@ -58,7 +58,7 @@ uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t ti
         return buf;
     }
     
-    SerialStartRecvIT(serial);
+    //SerialStartRecvIT(serial);
     return NULL;
 }
 
