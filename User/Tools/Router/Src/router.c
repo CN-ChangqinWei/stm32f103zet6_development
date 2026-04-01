@@ -1,22 +1,21 @@
-#include"router.h"
-#include"memory_poll.h"
+#include "router.h"
+#include "memory_poll.h"
+#include <string.h>
 static Router router={0};
 uint8_t RouterInit(){
-
+    memset(&router, 0, sizeof(Router));
+    return 0;
 }//初始化全局router单例
 uint8_t RouterExec(){
-    router.execFlag=1;
-    while (router.execFlag)
-    {
-        if(router.taskHeadCur!=router.taskTailCur){
-            Task tk=router.taskQue[router.taskHeadCur];
-            
-            if(tk.handler!=NULL)tk.handler(tk.arg);
-            router.taskHeadCur++;
-            router.taskHeadCur%=_ROUTER_MAX_TASK_CNT;
-            MemoryPollFree(tk.arg);
-        }
+    if(router.taskHeadCur!=router.taskTailCur){
+        Task tk=router.taskQue[router.taskHeadCur];
+        
+        if(tk.handler!=NULL)tk.handler(tk.arg);
+        router.taskHeadCur++;
+        router.taskHeadCur%=_ROUTER_MAX_TASK_CNT;
+        MemoryPollFree(tk.arg);
     }
+    
     
 }
 uint8_t RouterRegister(uint32_t protocol,RouterHandler handler){

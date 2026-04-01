@@ -26,6 +26,7 @@
 #include "serial_test.h"
 #include "servo_test.h"
 #include "pwm_test.h"
+#include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx_hal_tim.h"
 #include "service.h"
 /* USER CODE END Includes */
@@ -130,15 +131,21 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
+  /* USER CODE BEGIN RTOS_INIT */
+  /* 初始化必须在调度器启动前完成 */
+  serial1 = NewSerial(&huart2, recvBuf1, 255, sendBuf1, 255, 0, 0);
+  SerivceInit();
+  /* USER CODE END RTOS_INIT */
+
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of Communication */
-  osThreadDef(Communication, StartCommunication, osPriorityIdle, 0, 128);
+  osThreadDef(Communication, StartCommunication, osPriorityNormal, 0, 256);
   CommunicationHandle = osThreadCreate(osThread(Communication), NULL);
-
+  
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -150,24 +157,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  // TIM_OC_InitTypeDef config={
-  //   .OCMode = TIM_OCMODE_TIMING,
-  //   .Pulse = 0,
-  //   .OCPolarity = TIM_OCPOLARITY_HIGH,
-  //   .OCNPolarity = TIM_OCNPOLARITY_HIGH,
-  //   .OCFastMode = TIM_OCFAST_DISABLE,
-  //   .OCIdleState = TIM_OCIDLESTATE_RESET,
-  //   .OCNIdleState = TIM_OCNIDLESTATE_RESET,
-  // };
-  // ServoTest(&htim1,config,TIM_CHANNEL_1);
-  //SerialTest(&serial1);
-  serial1=NewSerial(&huart2,recvBuf1,255,sendBuf1,255,0,0);
-  SerivceInit();
-  
   while (1)
   {
     /* USER CODE END WHILE */
-
+    /* 调度器启动后不会执行到这里 */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -378,7 +371,7 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-  serial1 = NewSerial(&huart2, recvBuf1, 255, sendBuf1, 255,NULL, NULL);
+  /* serial1 在 main 中统一初始化 */
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -472,7 +465,9 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    /* LED 闪烁指示系统运行 */
+    ServiceExec();
+    osDelay(2);
   }
   /* USER CODE END 5 */
 }
@@ -491,7 +486,7 @@ void StartCommunication(void const * argument)
   for(;;)
   {
     ServiceCommHanlder();
-    osDelay(1);
+    osDelay(10);
   }
   /* USER CODE END StartCommunication */
 }
