@@ -3,7 +3,7 @@
 #include <string.h>
 
 Communication NewCommunication(void* instance, CommInterface interface) {
-    Communication comm;
+    Communication comm={0};
     comm.instance = instance;
     comm.interface = interface;
     comm.statu = MODE_LEN;
@@ -14,7 +14,7 @@ Communication NewCommunication(void* instance, CommInterface interface) {
 
 void* CommRecvPackage(Communication* comm, int* len) {
     uint32_t tempLen;
-    
+    if (len != NULL) *len=0;
     if (comm->statu == MODE_LEN) {
         // 先接收4字节长度
         uint32_t recvBytes = comm->interface.recv(comm->instance, (uint8_t*)&tempLen, sizeof(uint32_t));
@@ -22,7 +22,7 @@ void* CommRecvPackage(Communication* comm, int* len) {
             return NULL; // 长度未接收完整
         }
         
-        comm->recvLen = tempLen;
+        comm->recvLen=comm->totalLen = tempLen;
         
         // 使用内存池创建相应的内存区域
         comm->packageBuf = (uint8_t*)MemoryPollAlloc(comm->recvLen);
@@ -38,22 +38,22 @@ void* CommRecvPackage(Communication* comm, int* len) {
     } else if (comm->statu == MODE_DATA) {
         // 接收数据写入内存
         uint32_t recvBytes = comm->interface.recv(comm->instance, comm->packageBuf, comm->recvLen);
-        if (recvBytes < comm->recvLen) {
-            return NULL; // 数据未接收完整
-        }
+        comm->recvLen-=recvBytes;
         
         // 接收完全后返回指针
-        uint8_t* result = comm->packageBuf;
-        if (len != NULL) {
-            *len = comm->recvLen;
-        }
         
+        
+        if (comm->recvLen==0){
+            uint8_t* result = comm->packageBuf;
         // 重置状态，准备接收下一个包
-        comm->statu = MODE_LEN;
-        comm->recvLen = 0;
-        comm->packageBuf = NULL;
-        
-        return result;
+            comm->statu = MODE_LEN;
+            comm->recvLen = 0;
+            comm->packageBuf = NULL;
+            if (len != NULL) {
+                *len = comm->totalLen;
+            }
+            return result;
+        }
     }
     
     return NULL;

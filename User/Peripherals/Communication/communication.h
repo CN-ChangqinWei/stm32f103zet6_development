@@ -15,7 +15,9 @@ typedef struct{
     void* instance;
     uint16_t statu;//接收模式
     uint32_t recvLen;//接收DATA模式下还需要接收的长度
+    uint32_t totalLen;
     uint8_t* packageBuf;
+    uint32_t bufCur;
 }Communication;
 Communication NewCommunication(void* instance,CommInterface interface);
 void * CommRecvPackage(Communication* comm,int*len);
