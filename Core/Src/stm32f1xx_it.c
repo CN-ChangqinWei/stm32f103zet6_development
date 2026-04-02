@@ -211,7 +211,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart == serial1.uart) {
         // 在这里处理接收到的数据
-      
+      //SerialSendUseOtherBuf(&serial1,"recv it\n",strlen("recv it\n"));
+      SerialHandler(&serial1);
     }
 }
 /* USER CODE END 1 */

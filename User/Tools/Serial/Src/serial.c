@@ -1,6 +1,7 @@
 #include"serial.h"
 #include"memory_poll.h"
-
+#include"stdio.h"
+extern UART_HandleTypeDef huart2;
 Serial serial1;
 uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
 Serial NewSerial(UART_HandleTypeDef* uart,
@@ -24,16 +25,20 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     return serial;
 }
 uint8_t SerialsInit(){
+    serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, 0);
+    SerialStartRecvIT(&serial1);
     return 0;
 }
 
 void SerialStartRecvIT(Serial* serial){
     if(serial == NULL || serial->uart == NULL) return;
     HAL_UART_Receive_IT(serial->uart, &serial->rxTmp, 1);
+
 }
 void SerialStopRecvIT(Serial* serial){
     if(serial == NULL || serial->uart == NULL) return;
-    HAL_UART_AbortReceive_IT(serial->uart);
+    RingBufAddByte(&serial->recvRingBuf,serial->rxTmp);
+    //SerialStartRecvIT(serial);
 }
 
 // void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
@@ -44,7 +49,9 @@ void SerialStopRecvIT(Serial* serial){
 // }
 
 uint8_t SerialRecvIT(Serial* serial){
-    return RingBufPop(&serial->recvRingBuf);
+    uint8_t res=RingBufAddByte(&serial->recvRingBuf,serial->rxTmp);
+    HAL_UART_Receive_IT(serial->uart, &serial->rxTmp, 1);
+    // SerialSendUseOtherBuf(serial,(uint8_t*)&serial->recvRingBuf.len,sizeof(serial->recvRingBuf.len));
 }
 
 uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout) {
@@ -64,8 +71,9 @@ uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t ti
 }
 
 void  SerialHandler(Serial* serial){
-    if(serial == NULL || serial->recvRingBuf.len == 0) return;
-    uint8_t data = SerialRecvIT(serial);
+    if(serial == NULL ) return;
+    //SerialSendUseOtherBuf(serial, &serial->rxTmp, sizeof(uint8_t));
+    SerialRecvIT(serial);
 }
 
 
@@ -167,7 +175,7 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
     return len;
 }
 
-int      SerialBufLen(Serial* serial){
+int     SerialBufLen(Serial* serial){
     if(serial == NULL || serial->recvRingBuf.unit == NULL) return 0;
     return serial->recvRingBuf.len;
 }//获取对应serial实体缓冲区剩余数据的字节数

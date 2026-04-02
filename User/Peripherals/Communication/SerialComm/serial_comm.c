@@ -35,6 +35,7 @@ uint32_t SerialCommRecv(void* instance, uint8_t* data, uint32_t len) {
     if (serialComm->serial == NULL) return 0;
     
     // 使用 Serial 模块的阻塞接收函数
+    if(SerialBufLen(serialComm->serial)<len) return 0;
     uint32_t readLen = SerialReadBytes(serialComm->serial, data, len);
     
     return readLen;

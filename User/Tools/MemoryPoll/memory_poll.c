@@ -7,6 +7,9 @@ void MemoryPollInit(){
     manager.remain=_MEMORY_POLL_MAX_BYTE;
     manager.isInit=1;
 }
+char MemoryPollIsInit(){
+    return manager.isInit;
+}
 static void UnitsMigration(){
     int cur=0;
     MemoryUnit *unitArry = manager.units;

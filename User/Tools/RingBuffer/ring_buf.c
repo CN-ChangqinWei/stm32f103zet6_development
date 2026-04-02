@@ -1,14 +1,14 @@
 #include "ring_buf.h"
 #include <string.h>
 
-extern MemoryUnitManager manager;
+
 
 RingBuf NewRingBuf(int size)
 {
     RingBuf ring={0};
-    
-    MemoryPollAllocPlus(size,&ring.unit);
-    if (ring.unit->start == NULL) {
+    if(MemoryPollIsInit()==0) MemoryPollInit();
+    MemoryPollAllocPlus(size, &ring.unit);
+    if (ring.unit == NULL || ring.unit->start == NULL) {
         ring.unit = NULL;
         ring.head = 0;
         ring.tail = 0;
@@ -24,7 +24,7 @@ RingBuf NewRingBuf(int size)
 uint8_t RingBufAddByte(RingBuf* ring, char byte)
 {
     if (ring == NULL || ring->unit == NULL || ring->unit->start == NULL) {
-        return 0;
+        return 1;
     }
     int size = ring->unit->len;
     ring->unit->start[ring->tail] = byte;
@@ -34,7 +34,7 @@ uint8_t RingBufAddByte(RingBuf* ring, char byte)
     } else {
         ring->head = (ring->head + 1) % size;
     }
-    return 1;
+    return 0;
 }
 
 uint8_t RingBufAddData(RingBuf* ring, char* data, int len)
