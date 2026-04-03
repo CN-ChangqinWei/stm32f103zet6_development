@@ -2,8 +2,8 @@
 #include "pwm.h"
 
 
-struct Servo NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin,struct PWM pwm){
-    struct Servo res={
+Servo NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm){
+     Servo res={
        
         .num=0,
         .den=3600,
@@ -15,7 +15,7 @@ struct Servo NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin,struct PW
     return res;
 }
 
-uint8_t ServoPowerOn(struct Servo* servo,uint32_t num,uint32_t den){
+uint8_t ServoPowerOnByAngle( Servo* servo,uint32_t num,uint32_t den){
     if(servo == NULL){
         return 1;
     }
@@ -24,9 +24,9 @@ uint8_t ServoPowerOn(struct Servo* servo,uint32_t num,uint32_t den){
     }
     servo->isPowerOn = 1;
     PWMStart(&servo->pwm);
-    return ServoSetPosition(servo,num,den);
+    return ServoSetPosition(servo,num,den,0);
 }
-uint8_t ServoShutDown(struct Servo* servo){
+uint8_t ServoShutDown( Servo* servo){
     if(servo == NULL){
         return 1;
     }
@@ -40,13 +40,12 @@ uint8_t ServoShutDown(struct Servo* servo){
     PWMClose(&servo->pwm);
     return 0;
 }
-uint8_t 
-ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
+uint8_t ServoSetPosition( Servo* servo,uint32_t num,uint32_t den,uint32_t maxAngel){
     if(servo == NULL || den == 0||den<num){
         return 1;
     }
     if(!servo->isPowerOn){
-        if(ServoPowerOn(servo,num,den) != 0){
+        if(ServoPowerOnByAngle(servo,num,den) != 0){
             return 1;
         }
         return 0;
@@ -62,7 +61,7 @@ ServoSetPosition(struct Servo* servo,uint32_t num,uint32_t den){
     }
     return 0;
 }
-uint8_t ServoSetPositionByAngle(struct Servo* servo,float angle){
+uint8_t ServoSetPositionByAngle( Servo* servo,float angle){
     if(servo == NULL){
         return 1;
     }
@@ -74,5 +73,5 @@ uint8_t ServoSetPositionByAngle(struct Servo* servo,float angle){
     }
     uint32_t num = (uint32_t)(angle * 10);
     uint32_t den = 3600;
-    return ServoSetPosition(servo,num,den);
+    return ServoSetPosition(servo,num,den,0);
 }

@@ -32,6 +32,10 @@ uint8_t RouterAddTask(Task tk){
 }
 void  RouterAnlyPackage(void*package,int len){
     int protocol = *((int*)package);
+    if(protocol>=_ROUTER_MAX_CNT) {
+        MemoryPollFree(package);
+        return;
+    }
     RouterHandler handler = router.handlers[protocol];
     Task tk ={handler,package};
     RouterAddTask(tk);
