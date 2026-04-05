@@ -8,7 +8,7 @@ typedef struct {
     uint32_t channel;
 }PWM;
 
- PWM NewPWM(TIM_HandleTypeDef* tim,TIM_OC_InitTypeDef config,uint32_t channel);
+PWM NewPWM(TIM_HandleTypeDef* tim,TIM_OC_InitTypeDef config,uint32_t channel);
 uint8_t PWMStart( PWM* pwm);
 uint8_t PWMClose( PWM* pwm);
 uint8_t PWMSet( PWM* pwm,uint16_t pluse);

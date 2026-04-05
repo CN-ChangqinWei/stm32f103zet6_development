@@ -17,7 +17,7 @@ typedef struct {
 
 }Servo;
 
-Servo NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm);
+Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm);
 uint8_t ServoPowerOn(Servo* servo);
 uint8_t ServoPowerOnByAngle( Servo* servo,uint32_t num,uint32_t den);
 uint8_t ServoShutDown(Servo* servo);

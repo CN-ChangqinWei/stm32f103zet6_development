@@ -1,17 +1,28 @@
 #include"servo.h"
+#include "portable.h"
 #include "pwm.h"
 
 
-Servo NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm){
-     Servo res={
+Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm){
+    //  Servo res={
        
-        .num=0,
-        .den=3600,
-        .powerCtrlPort=powerCtrlPort,
-        .powerCtrlPin=powerCtrlPin,
-        .isPowerOn=0,
-        .pwm = pwm
-    };
+    //     .num=0,
+    //     .den=3600,
+    //     .powerCtrlPort=powerCtrlPort,
+    //     .powerCtrlPin=powerCtrlPin,
+    //     .isPowerOn=0,
+    //     .pwm = pwm
+    // };
+    // return res;
+    Servo* res = pvPortMalloc(sizeof(Servo));
+    if(NULL!=res){
+        res->num=0,
+        res->den=3600,
+        res->powerCtrlPin=powerCtrlPin;
+        res->powerCtrlPort=powerCtrlPort;
+        res->isPowerOn=0;
+        res->pwm=pwm;
+    }
     return res;
 }
 
