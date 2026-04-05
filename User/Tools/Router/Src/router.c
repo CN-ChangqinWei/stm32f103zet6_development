@@ -10,7 +10,7 @@ uint8_t RouterExec(){
     if(router.taskHeadCur!=router.taskTailCur){
         Task tk=router.taskQue[router.taskHeadCur];
         
-        if(tk.handler!=NULL)tk.handler(tk.arg);
+        if(tk.handler.handler!=NULL)tk.handler.handler(tk.handler.instance,tk.arg);
         router.taskHeadCur++;
         router.taskHeadCur%=_ROUTER_MAX_TASK_CNT;
         MemoryPollFree(tk.arg);
@@ -18,7 +18,7 @@ uint8_t RouterExec(){
     
     
 }
-uint8_t RouterRegister(uint32_t protocol,RouterHandler handler){
+uint8_t RouterRegister(uint32_t protocol,RouterHandlerPkg handler){
     if(protocol>=_ROUTER_MAX_CNT) return 1;
     router.handlers[protocol]=handler;
 }//注册handlerS
@@ -36,7 +36,7 @@ void  RouterAnlyPackage(void*package,int len){
         MemoryPollFree(package);
         return;
     }
-    RouterHandler handler = router.handlers[protocol];
+    RouterHandlerPkg handler = router.handlers[protocol];
     Task tk ={handler,package};
     RouterAddTask(tk);
 }

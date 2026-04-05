@@ -5,6 +5,6 @@ typedef struct{
 
 }MotorService;
 
-void* MotorExec(void* motor);
+void* MotorExec(void* motor,void* arg);
 
 #endif

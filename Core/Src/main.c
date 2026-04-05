@@ -131,20 +131,15 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
-  /* USER CODE BEGIN RTOS_INIT */
-  /* 初始化必须在调度器启动前完成 */
-    SerivceInit();
-  /* USER CODE END RTOS_INIT */
-
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of Communication */
-  osThreadDef(Communication, StartCommunication, osPriorityNormal, 0, 256);
+  osThreadDef(Communication, StartCommunication, osPriorityIdle, 0, 128);
   CommunicationHandle = osThreadCreate(osThread(Communication), NULL);
-  
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -159,7 +154,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    /* 调度器启动后不会执行到这里 */
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

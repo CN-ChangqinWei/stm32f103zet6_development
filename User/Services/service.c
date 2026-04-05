@@ -8,7 +8,8 @@ static SerialComm serialComm;
 void SerivceInit(){
 
     RouterInit();
-    RouterRegister(Health, HealthCommHandler);
+    RouterHandlerPkg healthHandler = {HealthCommHandler,NULL};
+    RouterRegister(Health, healthHandler);
     SerialsInit();
     serialComm=NewSerialComm(&serial1);
     service.listener=NewCommunicationFromSerial(&serialComm);

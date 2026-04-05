@@ -1,6 +1,7 @@
 #ifndef _MOTOR_H
 #define _MOTOR_H
 #include <stdint.h>
+#include "cmsis_os.h"
 typedef struct{
     uint8_t (*powerOn)(void*instance);
     uint8_t (*shutDown)(void*instance);
@@ -15,5 +16,5 @@ typedef struct {
     MotorInterface interface;
 
 }Motor;
-
+Motor* NewMotor(void*instance,MotorInterface interface);
 #endif
