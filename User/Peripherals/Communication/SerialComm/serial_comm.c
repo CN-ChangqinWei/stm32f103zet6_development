@@ -1,20 +1,21 @@
 #include "serial_comm.h"
 #include "serial.h"
+#include "portable.h"
 
-SerialComm NewSerialComm(Serial* serial) {
-    
-    SerialComm serialComm ;
-    serialComm.serial = serial;
-    serialComm.tempRecvBuf = NULL;
-    serialComm.tempRecvLen = 0;
-    serialComm.tempRecvCur = 0;
+SerialComm* NewSerialComm(Serial* serial) {
+    SerialComm* serialComm=(SerialComm*)pvPortMalloc(sizeof(SerialComm));
+    if(serialComm == NULL) return NULL;
+    serialComm->serial = serial;
+    serialComm->tempRecvBuf = NULL;
+    serialComm->tempRecvLen = 0;
+    serialComm->tempRecvCur = 0;
     //SerialStartRecvIT(serial);
     return serialComm;
 }
 
 void DeleteSerialComm(SerialComm* serialComm) {
     if (serialComm != NULL) {
-        MemoryPollFree(serialComm);
+        vPortFree(serialComm);
     }
 }
 
@@ -48,17 +49,7 @@ CommInterface GetSerialCommInterface(void) {
     return interface;
 }
 
-Communication NewCommunicationFromSerial(SerialComm* instance) {
-    Communication comm = {0};
-    
-    if (instance == NULL) return comm;
-    
-    // 设置接口
-    comm.interface = GetSerialCommInterface();
-    comm.instance = instance;
-    comm.statu = MODE_LEN;
-    comm.recvLen = 0;
-    comm.packageBuf = NULL;
-    
-    return comm;
+Communication* NewCommunicationFromSerial(SerialComm* instance) {
+    if (instance == NULL) return NULL;
+    return NewCommunication(instance, GetSerialCommInterface());
 }

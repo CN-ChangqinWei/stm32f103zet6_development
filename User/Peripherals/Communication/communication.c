@@ -1,15 +1,28 @@
 #include "communication.h"
 #include "router.h"
+#include "portable.h"
 #include <string.h>
 
-Communication NewCommunication(void* instance, CommInterface interface) {
-    Communication comm={0};
-    comm.instance = instance;
-    comm.interface = interface;
-    comm.statu = MODE_LEN;
-    comm.recvLen = 0;
-    comm.packageBuf = NULL;
+Communication* NewCommunication(void* instance, CommInterface interface) {
+    Communication* comm=(Communication*)pvPortMalloc(sizeof(Communication));
+    if(comm == NULL) return NULL;
+    comm->instance = instance;
+    comm->interface = interface;
+    comm->statu = MODE_LEN;
+    comm->recvLen = 0;
+    comm->totalLen = 0;
+    comm->packageBuf = NULL;
+    comm->bufCur = 0;
     return comm;
+}
+
+void DeleteCommunication(Communication* comm) {
+    if(comm != NULL){
+        if(comm->packageBuf != NULL){
+            vPortFree(comm->packageBuf);
+        }
+        vPortFree(comm);
+    }
 }
 
 void* CommRecvPackage(Communication* comm, int* len) {
@@ -25,8 +38,8 @@ void* CommRecvPackage(Communication* comm, int* len) {
         //CommSendPackage(comm,(uint8_t*)&tempLen,sizeof(uint32_t));
         comm->recvLen=comm->totalLen = tempLen;
         
-        // 使用内存池创建相应的内存区域
-        comm->packageBuf = (uint8_t*)MemoryPollAlloc(comm->recvLen);
+        // 使用FreeRTOS动态内存分配
+        comm->packageBuf = (uint8_t*)pvPortMalloc(comm->recvLen);
         if (comm->packageBuf == NULL) {
             comm->recvLen = 0;
             return NULL; // 内存分配失败

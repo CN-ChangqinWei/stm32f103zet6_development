@@ -19,9 +19,9 @@ typedef struct{
     #endif
 
 } Serial ;
-extern Serial serial1;
+extern Serial* serial1;
 extern uint8_t sendBuf1[255];
-Serial NewSerial(UART_HandleTypeDef* uart,
+Serial* NewSerial(UART_HandleTypeDef* uart,
     int       recvBufSize,
     uint8_t * sendBuf,
     uint32_t  sendLen
@@ -31,6 +31,7 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     
     #endif
 );
+void DeleteSerial(Serial* serial);
 
 void SerialStartRecvIT(Serial* serial);
 uint8_t SerialRecvIT(Serial* serial);

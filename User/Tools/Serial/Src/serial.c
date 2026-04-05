@@ -2,9 +2,9 @@
 #include"portable.h"
 #include"stdio.h"
 extern UART_HandleTypeDef huart2;
-Serial serial1;
+Serial* serial1=NULL;
 uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
-Serial NewSerial(UART_HandleTypeDef* uart,
+Serial* NewSerial(UART_HandleTypeDef* uart,
     int       recvBufSize,
     uint8_t * sendBuf,
     uint32_t  sendLen
@@ -13,20 +13,31 @@ Serial NewSerial(UART_HandleTypeDef* uart,
     DMA_HandleTypeDef* dmaRX
     #endif
 ){
-    Serial serial={0};
-    serial.uart = uart;
-    serial.recvRingBuf = NewRingBuf(recvBufSize);
-    serial.sendBuf = sendBuf;
-    serial.sendLen = sendLen;
+    Serial* serial=(Serial*)pvPortMalloc(sizeof(Serial));
+    if(serial == NULL) return NULL;
+    serial->uart = uart;
+    serial->recvRingBuf = NewRingBuf(recvBufSize);
+    serial->sendBuf = sendBuf;
+    serial->sendLen = sendLen;
     #ifdef HAL_DMA_MODULE_ENABLED
-    serial.dmaTX = dmaTX;
-    serial.dmaRX=dmaRX;
+    serial->dmaTX = dmaTX;
+    serial->dmaRX=dmaRX;
     #endif
     return serial;
 }
+
+void DeleteSerial(Serial* serial){
+    if(serial == NULL) return;
+    if(serial->recvRingBuf.buffer != NULL){
+        vPortFree(serial->recvRingBuf.buffer);
+    }
+    vPortFree(serial);
+}
+
 uint8_t SerialsInit(){
     serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, 0);
-    SerialStartRecvIT(&serial1);
+    if(serial1 == NULL) return 1;
+    SerialStartRecvIT(serial1);
     return 0;
 }
 

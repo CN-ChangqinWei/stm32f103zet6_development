@@ -14,11 +14,12 @@ typedef struct {
     uint16_t      powerCtrlPin;
     uint8_t       isPowerOn;
     //定时器设置pwm
-    PWM    pwm;
+    PWM*    pwm;
 
 }Servo;
 
-Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm);
+Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM* pwm);
+void DeleteServo(Servo* servo);
 uint8_t ServoPowerOn(Servo* servo);
 uint8_t ServoPowerOnByAngle( Servo* servo,uint32_t num,uint32_t den);
 uint8_t ServoShutDown(Servo* servo);

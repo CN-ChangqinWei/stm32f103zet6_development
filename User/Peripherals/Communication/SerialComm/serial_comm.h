@@ -14,7 +14,7 @@ typedef struct {
 } SerialComm;
 
 // 创建 SerialComm 对象
-SerialComm NewSerialComm(Serial* serial);
+SerialComm* NewSerialComm(Serial* serial);
 
 // 销毁 SerialComm 对象
 void DeleteSerialComm(SerialComm* serialComm);
@@ -29,6 +29,6 @@ uint32_t SerialCommRecv(void* instance, uint8_t* data, uint32_t len);
 CommInterface GetSerialCommInterface(void);
 
 // 便捷函数：直接使用 Serial 创建 Communication 对象
-Communication NewCommunicationFromSerial(SerialComm* serial);
+Communication* NewCommunicationFromSerial(SerialComm* instance);
 
 #endif

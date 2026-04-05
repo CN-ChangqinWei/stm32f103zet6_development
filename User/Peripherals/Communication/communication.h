@@ -1,6 +1,7 @@
 #ifndef _COMMUNICATION_H
 #define _COMMUNICATION_H
-#include "memory_poll.h"
+#include"cmsis_os.h"
+#include "portable.h"
 #include <stdint.h>
 typedef enum{
     MODE_LEN=0,
@@ -19,7 +20,8 @@ typedef struct{
     uint8_t* packageBuf;
     uint32_t bufCur;
 }Communication;
-Communication NewCommunication(void* instance,CommInterface interface);
+Communication* NewCommunication(void* instance,CommInterface interface);
+void DeleteCommunication(Communication* comm);
 void * CommRecvPackage(Communication* comm,int*len);
 void   CommSendPackage(Communication* comm,uint8_t* data,int len);
 void   CommHandler(Communication* comm);

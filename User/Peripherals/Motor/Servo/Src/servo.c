@@ -3,21 +3,11 @@
 #include "pwm.h"
 
 
-Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm){
-    //  Servo res={
-       
-    //     .num=0,
-    //     .den=3600,
-    //     .powerCtrlPort=powerCtrlPort,
-    //     .powerCtrlPin=powerCtrlPin,
-    //     .isPowerOn=0,
-    //     .pwm = pwm
-    // };
-    // return res;
+Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM* pwm){
     Servo* res = pvPortMalloc(sizeof(Servo));
-    if(NULL!=res){
-        res->num=0,
-        res->den=3600,
+    if(res != NULL){
+        res->num=0;
+        res->den=3600;
         res->powerCtrlPin=powerCtrlPin;
         res->powerCtrlPort=powerCtrlPort;
         res->isPowerOn=0;
@@ -26,33 +16,39 @@ Servo* NewServo(GPIO_TypeDef*powerCtrlPort,uint16_t powerCtrlPin, PWM pwm){
     return res;
 }
 
+void DeleteServo(Servo* servo){
+    if(servo != NULL){
+        ServoShutDown(servo);
+        vPortFree(servo);
+    }
+}
+
 uint8_t ServoPowerOnByAngle( Servo* servo,uint32_t num,uint32_t den){
-    if(servo == NULL){
+    if(servo == NULL || servo->pwm == NULL){
         return 1;
     }
     if(servo->powerCtrlPort != NULL){
         HAL_GPIO_WritePin(servo->powerCtrlPort,servo->powerCtrlPin,GPIO_PIN_SET);
     }
     servo->isPowerOn = 1;
-    PWMStart(&servo->pwm);
+    PWMStart(servo->pwm);
     return ServoSetPosition(servo,num,den,0);
 }
 uint8_t ServoShutDown( Servo* servo){
     if(servo == NULL){
         return 1;
     }
-    if(PWMClose(&servo->pwm) != 0){
-        return 1;
+    if(servo->pwm != NULL){
+        PWMClose(servo->pwm);
     }
     if(servo->powerCtrlPort != NULL){
         HAL_GPIO_WritePin(servo->powerCtrlPort,servo->powerCtrlPin,GPIO_PIN_RESET);
     }
     servo->isPowerOn = 0;
-    PWMClose(&servo->pwm);
     return 0;
 }
 uint8_t ServoSetPosition( Servo* servo,uint32_t num,uint32_t den,uint32_t maxAngel){
-    if(servo == NULL || den == 0||den<num){
+    if(servo == NULL || servo->pwm == NULL || den == 0||den<num){
         return 1;
     }
     if(!servo->isPowerOn){
@@ -67,7 +63,7 @@ uint8_t ServoSetPosition( Servo* servo,uint32_t num,uint32_t den,uint32_t maxAng
     uint32_t xnum = 4*servo->num+den;
     
     
-    if(PWMSetByRate(&servo->pwm,xnum,xden) != 0){
+    if(PWMSetByRate(servo->pwm,xnum,xden) != 0){
         return 1;
     }
     return 0;

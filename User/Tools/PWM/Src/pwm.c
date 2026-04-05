@@ -1,12 +1,21 @@
 #include"pwm.h"
+#include"portable.h"
 
-PWM NewPWM(TIM_HandleTypeDef* tim,TIM_OC_InitTypeDef config,uint32_t channel){
-      PWM res ={
-        .tim=tim,
-        .config=config,
-        .channel=channel
-    };
+PWM* NewPWM(TIM_HandleTypeDef* tim,TIM_OC_InitTypeDef config,uint32_t channel){
+    PWM* res = (PWM*)pvPortMalloc(sizeof(PWM));
+    if(res != NULL){
+        res->tim=tim;
+        res->config=config;
+        res->channel=channel;
+    }
     return res;
+}
+
+void DeletePWM(PWM* pwm){
+    if(pwm != NULL){
+        PWMClose(pwm);
+        vPortFree(pwm);
+    }
 }
 uint8_t PWMStart(  PWM* pwm){
     if(pwm == NULL){
