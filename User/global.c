@@ -1,0 +1,57 @@
+#include"global.h"
+#include"motor.h"
+#include"motor_repo.h"
+#include"motor_service.h"
+#include"servo.h"
+#include"pwm.h"
+#include"stm32f1xx_hal.h"
+
+// 外部声明已初始化的TIM句柄
+extern TIM_HandleTypeDef htim1;
+
+Motor motors[2]={0};
+MotorService* motorSrv=NULL;
+
+void MotorInit(){
+    // TIM_OC_InitTypeDef 配置 (标准PWM模式，已默认配置)
+    TIM_OC_InitTypeDef sConfigOC = {0};
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.Pulse = 0;
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+
+    // ========== Servo 0: PE9 (TIM1_CH1) ==========
+    PWM* pwm0 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_1);
+    if(pwm0 == NULL) return;
+    
+    Servo* servo0 = NewServo(NULL, 0, pwm0); // 无电源控制线
+    if(servo0 == NULL) return;
+    
+    MotorInterface interface0 = ServoInterface();
+    motors[0].instance = servo0;
+    motors[0].interface = interface0;
+
+    // ========== Servo 1: PE11 (TIM1_CH2) ==========
+    PWM* pwm1 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_2);
+    if(pwm1 == NULL) return;
+    
+    Servo* servo1 = NewServo(NULL, 0, pwm1); // 无电源控制线
+    if(servo1 == NULL) return;
+    
+    MotorInterface interface1 = ServoInterface();
+    motors[1].instance = servo1;
+    motors[1].interface = interface1;
+
+    // ========== 创建 MotorRepo ==========
+    MotorRepo* repo = NewMotorReop(motors, 2); // 2个电机
+    if(repo == NULL) return;
+
+    // ========== 创建 MotorService ==========
+    motorSrv = NewMotorService(repo, repo->interface);
+}
+
+void GlobalInit(){
+    MotorInit();
+}
+
+

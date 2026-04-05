@@ -15,7 +15,7 @@ set(USER_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository
-    
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User
 )
 
 set(USER_Application_Src
@@ -37,6 +37,7 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer/ring_buf.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/motor.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository/motor_repo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/global.c
 )
 
 
