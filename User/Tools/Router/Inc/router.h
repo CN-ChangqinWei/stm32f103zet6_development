@@ -1,6 +1,7 @@
 #ifndef _ROUTER_H
 #define _ROUTER_H
 #include <stdint.h>
+#include "cmsis_os.h"
 #define _ROUTER_MAX_CNT 100
 #define _ROUTER_MAX_TASK_CNT 100
 typedef uint16_t (*RouterHandler)(void*instance,void*arg);

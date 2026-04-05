@@ -1,5 +1,5 @@
 #include "router.h"
-#include "memory_poll.h"
+#include "portable.h"
 #include <string.h>
 static Router router={0};
 uint8_t RouterInit(){
@@ -13,7 +13,7 @@ uint8_t RouterExec(){
         if(tk.handler.handler!=NULL)tk.handler.handler(tk.handler.instance,tk.arg);
         router.taskHeadCur++;
         router.taskHeadCur%=_ROUTER_MAX_TASK_CNT;
-        MemoryPollFree(tk.arg);
+        vPortFree(tk.arg);
     }
     
     
@@ -33,7 +33,7 @@ uint8_t RouterAddTask(Task tk){
 void  RouterAnlyPackage(void*package,int len){
     int protocol = *((int*)package);
     if(protocol>=_ROUTER_MAX_CNT) {
-        MemoryPollFree(package);
+        vPortFree(package);
         return;
     }
     RouterHandlerPkg handler = router.handlers[protocol];

@@ -1,10 +1,10 @@
 #ifndef _RING_BUF_H
 #define _RING_BUF_H
-#include "memory_poll.h"
 #include <stdint.h>
-
+#include "cmsis_os.h"
 typedef struct{
-    MemoryUnit* unit;
+    char* buffer;
+    int size;
     int head;
     int tail;
     int len;

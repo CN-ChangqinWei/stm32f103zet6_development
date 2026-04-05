@@ -1,5 +1,5 @@
 #include"serial.h"
-#include"memory_poll.h"
+#include"portable.h"
 #include"stdio.h"
 extern UART_HandleTypeDef huart2;
 Serial serial1;
@@ -82,9 +82,8 @@ void  SerialHandler(Serial* serial){
 uint8_t SerialSetRecvBuf(Serial* serial, int size){
     if(serial == NULL || size <= 0) return 1;
     SerialStopRecvIT(serial);
-    if(serial->recvRingBuf.unit != NULL) {
-        MemoryPollFree(serial->recvRingBuf.unit->start);
-        MemoryPollFree(serial->recvRingBuf.unit);
+    if(serial->recvRingBuf.buffer != NULL) {
+        vPortFree(serial->recvRingBuf.buffer);
     }
     serial->recvRingBuf = NewRingBuf(size);
     SerialStartRecvIT(serial);
@@ -176,11 +175,11 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
 }
 
 int     SerialBufLen(Serial* serial){
-    if(serial == NULL || serial->recvRingBuf.unit == NULL) return 0;
+    if(serial == NULL || serial->recvRingBuf.buffer == NULL) return 0;
     return serial->recvRingBuf.len;
 }//获取对应serial实体缓冲区剩余数据的字节数
 
 uint32_t SerialReadBytes(Serial* serial,char* buf,int len){
-    if(serial == NULL || buf == NULL || len <= 0 || serial->recvRingBuf.unit == NULL) return 0;
+    if(serial == NULL || buf == NULL || len <= 0 || serial->recvRingBuf.buffer == NULL) return 0;
     return RingBufRead(&serial->recvRingBuf, buf, len);
 }//获取指定长度数据到buf,返回值是实际长度
