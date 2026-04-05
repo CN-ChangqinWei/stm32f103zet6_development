@@ -3,6 +3,7 @@
 #include "stm32f1xx_hal.h"
 #include <stdint.h>
 #include "pwm.h"
+#include"cmsis_os.h"
 typedef struct {
     //位置量 (num*360)/den 度
     uint32_t      num;

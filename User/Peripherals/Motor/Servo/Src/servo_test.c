@@ -16,7 +16,7 @@ void ServoTest(TIM_HandleTypeDef* tim,TIM_OC_InitTypeDef config,uint32_t channel
     while(1){
         for(int i=0;i<3;i++){
             HAL_Delay(2000);
-            ServoSetPosition(&servo,arr[i],360,0);
+            ServoSetPosition(servo,arr[i],360,0);
         }
         
     }
