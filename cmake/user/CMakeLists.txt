@@ -9,11 +9,12 @@ set(USER_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Communication
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Communication/SerialComm
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Doamin
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Domain
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Usage
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository
     
 )
 
@@ -35,6 +36,7 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm/health_comm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer/ring_buf.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/motor.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository/motor_repo.c
 )
 
 

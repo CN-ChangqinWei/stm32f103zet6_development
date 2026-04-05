@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "pwm.h"
 #include"cmsis_os.h"
+#include"motor.h"
 typedef struct {
     //位置量 (num*360)/den 度
     uint32_t      num;
@@ -25,6 +26,7 @@ uint8_t ServoPowerOnByAngle( Servo* servo,uint32_t num,uint32_t den);
 uint8_t ServoShutDown(Servo* servo);
 uint8_t ServoSetPosition( Servo* servo,uint32_t num,uint32_t den,uint32_t maxAngel);
 uint8_t ServoSetPositionByAngle( Servo* servo,float angle);
+MotorInterface ServoInterface();
 // servo 不存在以下类型接口但其它的motor可能会存在
 // uint8_t ServoSetPositionByEncode(Servo* servo,int encode);
 // uint8_t ServoSetSpeed(Servo* servo,int pwmNum,int pwmDen);
