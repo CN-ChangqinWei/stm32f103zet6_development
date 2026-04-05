@@ -1,8 +1,9 @@
 #ifndef _MOTOR_REPO_H
 #define _MOTOR_REPO_H
+#include"cmsis_os.h"
 #include"motor.h"
 #include"motor_service.h"
-#include"cmsis_os.h"
+
 typedef struct{
     Motor* motors;
     int     len;

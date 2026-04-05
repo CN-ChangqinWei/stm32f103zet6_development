@@ -3,8 +3,8 @@
 
 typedef enum{
     Health=0,
-    Echo,
-    Motor
+    PROTO_ECHO,
+    PROTO_MOTOR
 } Protocol;
 
 #endif

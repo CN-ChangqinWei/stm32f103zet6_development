@@ -3,6 +3,7 @@
 #define _MOTOR_SERVICE_H
 #include "stdio.h"
 #include <stdint.h>
+#include"cmsis_os.h"
 #include "motor_domain.h"
 typedef struct {
     char (*isMotorExsits)(void*repo,int id);
