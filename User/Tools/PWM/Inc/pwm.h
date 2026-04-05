@@ -2,6 +2,7 @@
 #define _PWM_H
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_tim.h"
+#include"cmsis_os.h"
 typedef struct {
     TIM_OC_InitTypeDef config;
     TIM_HandleTypeDef* tim;

@@ -3,10 +3,12 @@
 #define _SERVICE_H
 #include"serial_comm.h"
 #include"router.h"
+#include"cmsis_os.h"
 #include"protocol.h"
 #include"communication.h"
+#include"string.h"
 typedef struct{
-    Communication listener;
+    Communication* listener;
 }Service;
 void SerivceInit();
 void ServiceExec();

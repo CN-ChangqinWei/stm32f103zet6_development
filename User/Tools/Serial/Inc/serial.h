@@ -2,6 +2,7 @@
 #define _SERIAL_H
 #include "stm32f1xx_hal.h"
 #include "ring_buf.h"
+#include"cmsis_os.h"
 #define _SERIAL_BUF_SIZE    255
 typedef struct{
     UART_HandleTypeDef* uart;
