@@ -15,4 +15,5 @@ void SerivceInit();
 void ServiceExec();
 void ServiceCommHanlder();
 void ServiceComm(char* buf,int len);
+uint16_t ServiceErrHandler(void*instance,void* arg);
 #endif

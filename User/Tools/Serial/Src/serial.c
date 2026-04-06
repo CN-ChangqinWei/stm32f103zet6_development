@@ -83,8 +83,9 @@ uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t ti
 
 void  SerialHandler(Serial* serial){
     if(serial == NULL ) return;
-    //SerialSendUseOtherBuf(serial, &serial->rxTmp, sizeof(uint8_t));
+    SerialSendUseOtherBuf(serial, &serial->rxTmp, sizeof(uint8_t));
     SerialRecvIT(serial);
+    //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,!HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5));
 }
 
 

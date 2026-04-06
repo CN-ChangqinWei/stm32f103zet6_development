@@ -42,6 +42,8 @@ void* CommRecvPackage(Communication* comm, int* len) {
         comm->packageBuf = (uint8_t*)pvPortMalloc(comm->recvLen);
         if (comm->packageBuf == NULL) {
             comm->recvLen = 0;
+            comm->statu=MODE_LEN;
+            //CommSendPackage(comm,(uint8_t*)"fail to malloc\n",strlen("fail to malloc\n"));
             return NULL; // 内存分配失败
         }
         
@@ -53,8 +55,9 @@ void* CommRecvPackage(Communication* comm, int* len) {
         // 接收数据写入内存（写入到当前偏移位置）
         uint32_t recvBytes = comm->interface.recv(comm->instance, comm->packageBuf + (comm->totalLen - comm->recvLen), comm->recvLen);
         comm->recvLen -= recvBytes;
+        
         if(recvBytes!=0)
-        //CommSendPackage(comm, (uint8_t*)&recvBytes, sizeof(uint32_t));
+        
         
         // 接收完全后返回指针
         if (comm->recvLen == 0) {

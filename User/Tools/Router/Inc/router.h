@@ -23,6 +23,7 @@ typedef struct{
     uint32_t taskHeadCur;//循环队列头
     uint32_t taskTailCur;//循环队列尾部
     uint8_t  execFlag;
+    RouterHandlerPkg errHandler;
 }Router;
 
 uint8_t RouterInit();//初始化全局router单例
@@ -31,6 +32,6 @@ uint8_t RouterRegister(uint32_t protocol,RouterHandlerPkg handler);//注册handl
 uint8_t RouterAddTask(Task tk);
 void    RouterAnlyPackage(void*,int len);
 void    RouterStopExec();
-
+void    RouterSetErrHandler(RouterHandlerPkg pkg);
 
 #endif
