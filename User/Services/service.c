@@ -14,15 +14,8 @@ void SerivceInit(){
     if(service.listener != NULL){
         CommSendPackage(service.listener,"hello",strlen("hello"));
     }
-    
-    
-
     RouterInit();
-    
     RouterHandlerPkg healthHandler = {HealthCommHandler,NULL};
-
-
-
     RouterRegister(Health, healthHandler);
     
 }

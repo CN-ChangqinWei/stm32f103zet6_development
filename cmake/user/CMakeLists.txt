@@ -34,10 +34,13 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Usage/health_service.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Usage/motor_service.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm/health_comm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/comm/motor_comm.c
+
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/RingBuffer/ring_buf.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/motor.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository/motor_repo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/global.c
+    
 )
 
 

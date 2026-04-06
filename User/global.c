@@ -2,14 +2,17 @@
 #include"motor.h"
 #include"motor_repo.h"
 #include"motor_service.h"
+#include"motor_comm.h"
+#include "router.h"
 #include"servo.h"
 #include"pwm.h"
 #include"stm32f1xx_hal.h"
-
+#include"service.h"
 // 外部声明已初始化的TIM句柄
 extern TIM_HandleTypeDef htim1;
 
 Motor motors[2]={0};
+MotorRepo*    motorRepo=NULL;
 MotorService* motorSrv=NULL;
 
 void MotorInit(){
@@ -50,8 +53,16 @@ void MotorInit(){
     motorSrv = NewMotorService(repo, repo->interface);
 }
 
+void RoutesInit(){
+   SerivceInit();
+   RouterHandlerPkg motorHandler={MotorHandler,motorSrv};
+   RouterRegister(PROTO_MOTOR, motorHandler);
+}
+
 void GlobalInit(){
     MotorInit();
+
+    RoutesInit();
 }
 
 

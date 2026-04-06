@@ -1,37 +1,36 @@
 #include"motor_service.h"
 #include"portable.h"
+#include<stdio.h>
 
-void* MotorExec(void* service,void* arg){//根据mode实现各种电机操作
-    if(service == NULL || arg == NULL) return NULL;
+int MotorExec(void* service,void* arg){//根据mode实现各种电机操作
+    if(service == NULL || arg == NULL) return Fail;
     
     MotorService* motorService = (MotorService*)service;
     MotorDomain* domain = (MotorDomain*)arg;
     static MotorDomainReply reply;
     
-    reply.protocol = domain->protocol;
+    
     
     void* repo = motorService->repo;
     int id = domain->id;
     
     // 检查电机是否存在
     if(!motorService->interface.isMotorExsits(repo, id)){
-        reply.res = NoSuchDev;
-        return &reply;
+        
+        return NoSuchDev;
     }
     
     // 根据电源状态操作
     if(domain->powerOn){
         if(!motorService->interface.powerOn(repo, id)){
-            reply.res = Fail;
-            return &reply;
+            return Fail;
         }
     } else {
         if(!motorService->interface.shutOff(repo, id)){
-            reply.res = Fail;
-            return &reply;
+            return Fail;
         }
-        reply.res = Success;
-        return &reply;
+        
+        return Success;
     }
     
     // 根据模式执行相应操作
@@ -51,12 +50,10 @@ void* MotorExec(void* service,void* arg){//根据mode实现各种电机操作
             result = motorService->interface.setSpeedByAngel(repo, id, domain->spNumAngel, domain->spDenAngel);
             break;
         default:
-            reply.res = ArgErr;
-            return &reply;
+            return ArgErr;
     }
     
-    reply.res = result ? Success : Fail;
-    return &reply;
+    return Success;
 }
 
 MotorService* NewMotorService(void* repo,MotorRepoInterface interface){

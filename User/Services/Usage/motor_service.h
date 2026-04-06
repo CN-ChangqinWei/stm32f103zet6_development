@@ -20,6 +20,6 @@ typedef struct{
     MotorRepoInterface interface;
 }MotorService;
 
-void* MotorExec(void* service,void* arg);//业务层执行，
+int MotorExec(void* service,void* arg);//业务层执行，
 MotorService* NewMotorService(void* repo,MotorRepoInterface interface);
 #endif

@@ -2,6 +2,7 @@
 #include "portable.h"
 #include <string.h>
 static Router router={0};
+static char* routerMsg=NULL;
 uint8_t RouterInit(){
     memset(&router, 0, sizeof(Router));
     return 0;
