@@ -1,9 +1,11 @@
 #ifndef _SERIAL_H
 #define _SERIAL_H
+#include"defines.h"
 #include "stm32f1xx_hal.h"
 #include "ring_buf.h"
 #include"cmsis_os.h"
 #define _SERIAL_BUF_SIZE    255
+#define _SERIAL_DMA_BUF_SIZE    1024
 typedef struct{
     UART_HandleTypeDef* uart;
     RingBuf   recvRingBuf;//接收环形缓冲区
@@ -16,7 +18,12 @@ typedef struct{
     #ifdef HAL_DMA_MODULE_ENABLED
     DMA_HandleTypeDef* dmaTX;//如果dma不为0那么recvbuf和sendbuf
     DMA_HandleTypeDef* dmaRX;
-
+    char* bufDmaTX;
+    char* bufDmaRX;
+    int   wCurDmaRX;
+    int   rCurDmaRX;
+    int   wCurDmaTX;
+    int   rCurDmaTX;
     #endif
 
 } Serial ;
@@ -36,9 +43,14 @@ void DeleteSerial(Serial* serial);
 
 void SerialStartRecvIT(Serial* serial);
 uint8_t SerialRecvIT(Serial* serial);
+void SerialStartRecvDMA(Serial* serial);
+uint8_t SerialRecvDMA(Serial* serial);
+
 uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t timeout);
 uint8_t SerialsInit();
 void    SerialHandler(Serial* serial);
+void    SerialDmaHandler(Serial* serial);
+
 uint8_t SerialSetRecvBuf(Serial* serial, int size);
 uint8_t SerialSetSendBuf(Serial* serial,uint8_t* buf, uint32_t len);
 uint32_t SerialSend(Serial* serial,uint32_t len);//发送指定字节 如果dma存在且实例中有搬运的地址与结构体设定相同，那么用dma搬运

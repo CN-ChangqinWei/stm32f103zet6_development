@@ -58,7 +58,9 @@ void RoutesInit(){
    
    RouterHandlerPkg motorHandler={MotorHandler,motorSrv};
    RouterRegister(PROTO_MOTOR, motorHandler);
-   //ServiceComm("motor service init fin\n",strlen("motor service init fin\n"));
+   #ifdef _DEBUG
+   ServiceComm("motor service init fin\n",strlen("motor service init fin\n"));
+   #endif
 }
 
 void GlobalInit(){

@@ -213,7 +213,9 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-  
+  // #ifndef _SERIAL_IT_MODE
+  // SerialDmaHandler(serial1);
+  // #endif
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -222,6 +224,8 @@ void USART2_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+#ifdef _SERIAL_IT_MODE
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart == serial1->uart) {
@@ -230,4 +234,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       SerialHandler(serial1);
     }
 }
+#else
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+    if(huart == serial1->uart) {
+        // 处理 IDLE 中断，将 DMA 数据转移到 ringbuf
+        
+        SerialDmaHandler(serial1);
+    }
+}
+#endif
+
 /* USER CODE END 1 */

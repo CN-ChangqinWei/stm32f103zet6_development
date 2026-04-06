@@ -1,10 +1,12 @@
 #include"serial.h"
 #include"portable.h"
 #include"stdio.h"
+#include"string.h"
 extern UART_HandleTypeDef huart2;
 Serial* serial1=NULL;
 uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
 uint8_t ringBuf[_SERIAL_BUF_SIZE]={0};
+extern DMA_HandleTypeDef hdma_usart2_rx;
 //#define _SERIAL_BUF_USE_STATIC
 Serial* NewSerial(UART_HandleTypeDef* uart,
     int       recvBufSize,
@@ -23,13 +25,21 @@ Serial* NewSerial(UART_HandleTypeDef* uart,
     #else
     serial->recvRingBuf = NewRingBuf(recvBufSize);
     #endif
-
+    
     
     serial->sendBuf = sendBuf;
     serial->sendLen = sendLen;
     #ifdef HAL_DMA_MODULE_ENABLED
     serial->dmaTX = dmaTX;
     serial->dmaRX=dmaRX;
+    if(serial->dmaRX!=NULL){
+        serial->bufDmaRX=pvPortMalloc(_SERIAL_DMA_BUF_SIZE);
+        
+    }
+    if(serial->dmaTX!=NULL){
+        serial->bufDmaTX=pvPortMalloc(_SERIAL_DMA_BUF_SIZE);
+        
+    }
     #endif
     return serial;
 }
@@ -39,13 +49,16 @@ void DeleteSerial(Serial* serial){
     if(serial->recvRingBuf.buffer != NULL){
         vPortFree(serial->recvRingBuf.buffer);
     }
+    if(serial->bufDmaRX) vPortFree(serial->bufDmaRX);
+    if(serial->bufDmaTX) vPortFree(serial->bufDmaTX);
     vPortFree(serial);
 }
 
 uint8_t SerialsInit(){
-    serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, 0);
+    serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, &hdma_usart2_rx);
     if(serial1 == NULL) return 1;
-    SerialStartRecvIT(serial1);
+    //SerialStartRecvIT(serial1);
+    SerialStartRecvDMA(serial1);
     return 0;
 }
 
@@ -59,7 +72,49 @@ void SerialStopRecvIT(Serial* serial){
     RingBufAddByte(&serial->recvRingBuf,serial->rxTmp);
     //SerialStartRecvIT(serial);
 }
-
+void SerialStartRecvDMA(Serial* serial){
+    serial->rCurDmaRX=0;
+    serial->wCurDmaRX=0;
+    HAL_UARTEx_ReceiveToIdle_DMA(serial->uart,serial->bufDmaRX,_SERIAL_DMA_BUF_SIZE);
+    __HAL_UART_ENABLE_IT(serial->uart,UART_IT_IDLE);
+    __HAL_DMA_DISABLE_IT(serial->dmaRX, DMA_IT_HT);
+}
+uint8_t SerialRecvDMA(Serial* serial){//移动dma读写指针并且把dma缓冲区的内容存入recvRingbuf
+    if(serial == NULL || serial->dmaRX == NULL || serial->bufDmaRX == NULL) return 1;
+    
+    // 获取DMA剩余传输计数
+    int nBytesRemain = __HAL_DMA_GET_COUNTER(serial->dmaRX);
+    // 计算已接收字节数 = 缓冲区总大小 - 剩余计数
+    int nBytesRecv = _SERIAL_DMA_BUF_SIZE - nBytesRemain;
+    
+    if(nBytesRecv == 0) return 0; // 没有新数据
+    
+    // 获取写入指针位置（相对于DMA缓冲区起始地址）
+    int wPos = serial->wCurDmaRX;
+    
+    // 计算本次需要读取的字节数
+    int bytesToRead = nBytesRecv;
+    
+    // 处理环形缓冲区环绕的情况
+    if(wPos + bytesToRead > _SERIAL_DMA_BUF_SIZE) {
+        // 第一部分：从当前位置到缓冲区末尾
+        int firstPart = _SERIAL_DMA_BUF_SIZE - wPos;
+        RingBufAddData(&serial->recvRingBuf, serial->bufDmaRX + wPos, firstPart);
+        // 第二部分：从缓冲区开头到剩余数据
+        int secondPart = bytesToRead - firstPart;
+        RingBufAddData(&serial->recvRingBuf, serial->bufDmaRX, secondPart);
+        serial->wCurDmaRX = secondPart;
+    } else {
+        // 没有环绕，直接读取
+        RingBufAddData(&serial->recvRingBuf, serial->bufDmaRX + wPos, bytesToRead);
+        serial->wCurDmaRX = wPos + bytesToRead;
+        if(serial->wCurDmaRX >= _SERIAL_DMA_BUF_SIZE) {
+            serial->wCurDmaRX = 0;
+        }
+    }
+    SerialStartRecvDMA(serial);
+    return 0;
+}
 // void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 //     if(huart == serial1.uart){
 //         RingBufAddByte(&serial1.recvRingBuf, serial1.rxTmp);
@@ -100,7 +155,19 @@ void  SerialHandler(Serial* serial){
     //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,!HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5));
 }
 
-
+void  SerialDmaHandler(Serial* serial){
+    if(serial == NULL ) return;
+    //__HAL_UART_CLEAR_IDLEFLAG(serial->uart);
+    SerialRecvDMA(serial);
+    #ifdef _DEBUG
+    int len=SerialBufLen(serial);
+    char* buf = pvPortMalloc(len);
+    SerialReadBytes(serial,buf,len);
+    SerialSendUseOtherBuf(serial,buf,len);
+    SerialSendUseOtherBuf(serial,"idel\n",strlen("idel\n"));
+    #endif
+    
+}
 
 
 uint8_t SerialSetRecvBuf(Serial* serial, int size){
