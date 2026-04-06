@@ -4,6 +4,8 @@
 extern UART_HandleTypeDef huart2;
 Serial* serial1=NULL;
 uint8_t sendBuf1[_SERIAL_BUF_SIZE]={0};
+uint8_t ringBuf[_SERIAL_BUF_SIZE]={0};
+//#define _SERIAL_BUF_USE_STATIC
 Serial* NewSerial(UART_HandleTypeDef* uart,
     int       recvBufSize,
     uint8_t * sendBuf,
@@ -16,7 +18,13 @@ Serial* NewSerial(UART_HandleTypeDef* uart,
     Serial* serial=(Serial*)pvPortMalloc(sizeof(Serial));
     if(serial == NULL) return NULL;
     serial->uart = uart;
+    #ifdef _SERIAL_BUF_USE_STATIC
+    serial->recvRingBuf = NewRingBufByOther(recvBufSize,ringBuf);
+    #else
     serial->recvRingBuf = NewRingBuf(recvBufSize);
+    #endif
+
+    
     serial->sendBuf = sendBuf;
     serial->sendLen = sendLen;
     #ifdef HAL_DMA_MODULE_ENABLED
@@ -43,7 +51,7 @@ uint8_t SerialsInit(){
 
 void SerialStartRecvIT(Serial* serial){
     if(serial == NULL || serial->uart == NULL) return;
-    HAL_UART_Receive_IT(serial->uart, &serial->rxTmp, 1);
+    HAL_UART_Receive_IT(serial->uart, (uint8_t*)&serial->rxTmp, 1);
 
 }
 void SerialStopRecvIT(Serial* serial){
@@ -60,8 +68,8 @@ void SerialStopRecvIT(Serial* serial){
 // }
 
 uint8_t SerialRecvIT(Serial* serial){
-    uint8_t res=RingBufAddByte(&serial->recvRingBuf,serial->rxTmp);
-    HAL_UART_Receive_IT(serial->uart, &serial->rxTmp, 1);
+    RingBufAddByte(&serial->recvRingBuf,serial->rxTmp);
+    HAL_UART_Receive_IT(serial->uart, (uint8_t*)&serial->rxTmp, 1);
     // SerialSendUseOtherBuf(serial,(uint8_t*)&serial->recvRingBuf.len,sizeof(serial->recvRingBuf.len));
 }
 
@@ -83,8 +91,12 @@ uint8_t* SerialRecvPause(Serial* serial, uint8_t* buf, uint32_t len, uint32_t ti
 
 void  SerialHandler(Serial* serial){
     if(serial == NULL ) return;
-    SerialSendUseOtherBuf(serial, &serial->rxTmp, sizeof(uint8_t));
+   
+    //SerialSendUseOtherBuf(serial, (uint8_t*)&serial->rxTmp, 1);
     SerialRecvIT(serial);
+    // SerialReadBytes(serial,(uint8_t*)&byte,1);
+    // SerialSendUseOtherBuf(serial, (uint8_t*)&serial->rxTmp, 1);
+    //SerialSendUseOtherBuf(serial, (uint8_t*)&serial->rxTmp, sizeof(uint32_t));
     //HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,!HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_5));
 }
 
@@ -188,7 +200,12 @@ uint32_t SerialRecvUseOtherBuf(Serial* serial, uint8_t* buf, uint32_t len){
 
 int     SerialBufLen(Serial* serial){
     if(serial == NULL || serial->recvRingBuf.buffer == NULL) return 0;
-    return serial->recvRingBuf.len;
+    // 关中断保护，防止len被中断修改时读取到不一致值
+    // uint32_t primask = __get_PRIMASK();
+    // __disable_irq();
+    int len = serial->recvRingBuf.len;
+    //__set_PRIMASK(primask);
+    return len;
 }//获取对应serial实体缓冲区剩余数据的字节数
 
 uint32_t SerialReadBytes(Serial* serial,char* buf,int len){

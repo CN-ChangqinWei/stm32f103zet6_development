@@ -198,7 +198,7 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-  ServiceCommHanlder();
+  
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
@@ -211,7 +211,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart == serial1->uart) {
         // 在这里处理接收到的数据
-      //SerialSendUseOtherBuf(&serial1,"recv it\n",strlen("recv it\n"));
+      //SerialSendUseOtherBuf(serial1,"recv it\n",strlen("recv it\n"));
       SerialHandler(serial1);
     }
 }

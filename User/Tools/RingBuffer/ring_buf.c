@@ -19,7 +19,22 @@ RingBuf NewRingBuf(int size)
     ring.len = 0;
     return ring;
 }
-
+RingBuf NewRingBufByOther(int size,char* buf){
+    RingBuf ring={0};
+    ring.buffer = buf;
+    if (ring.buffer == NULL) {
+        ring.size = 0;
+        ring.head = 0;
+        ring.tail = 0;
+        ring.len = 0;
+        return ring;
+    }
+    ring.size = size;
+    ring.head = 0;
+    ring.tail = 0;
+    ring.len = 0;
+    return ring;
+}
 uint8_t RingBufAddByte(RingBuf* ring, char byte)
 {
     if (ring == NULL || ring->buffer == NULL) {

@@ -58,7 +58,7 @@ void RoutesInit(){
    
    RouterHandlerPkg motorHandler={MotorHandler,motorSrv};
    RouterRegister(PROTO_MOTOR, motorHandler);
-   ServiceComm("motor service init fin\n",strlen("motor service init fin\n"));
+   //ServiceComm("motor service init fin\n",strlen("motor service init fin\n"));
 }
 
 void GlobalInit(){
@@ -69,7 +69,7 @@ void GlobalInit(){
         ServiceComm((char*)&err,sizeof(err));
         return;
     }else{
-        ServiceComm("motor init fin\n",strlen("motor init fin\n"));
+        //ServiceComm("motor init fin\n",strlen("motor init fin\n"));
     }
 
     RoutesInit();

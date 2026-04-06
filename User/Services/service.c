@@ -13,13 +13,13 @@ void SerivceInit(){
     serialComm=NewSerialComm(serial1);
     service.listener=NewCommunicationFromSerial(serialComm);
     if(service.listener != NULL){
-        CommSendPackage(service.listener,"hello",strlen("hello"));
+        //CommSendPackage(service.listener,"hello",strlen("hello"));
     }
     RouterInit();
     RouterHandlerPkg healthHandler = {HealthCommHandler,NULL};
     RouterRegister(Health, healthHandler);
-    // RouterHandlerPkg errHandler ={ServiceErrHandler,&service};
-    // RouterSetErrHandler(errHandler);
+    RouterHandlerPkg errHandler ={ServiceErrHandler,&service};
+    RouterSetErrHandler(errHandler);
 }
 
 void ServiceExec(){
@@ -29,7 +29,7 @@ void ServiceCommHanlder(){
     static int cnt=0;
     if(service.listener == NULL) return;
     // cnt++;
-    // if(cnt>=500){
+    // if(cnt>=50){
     //     cnt=0;
     //     CommSendPackage(service.listener,"runing\n",strlen("runing\n"));
     // }
