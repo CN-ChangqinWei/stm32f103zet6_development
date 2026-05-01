@@ -47,7 +47,7 @@ int MotorInit(){
     motors[2].interface = interface1;
 
     // ========== 创建 MotorRepo ==========
-    MotorRepo* repo = NewMotorReop(motors, 2); // 2个电机
+    MotorRepo* repo = NewMotorReop(motors, 3); // 2个电机
     if(repo == NULL) return 5;
 
     // ========== 创建 MotorService ==========
