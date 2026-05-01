@@ -8,10 +8,11 @@
 #include"pwm.h"
 #include"stm32f1xx_hal.h"
 #include"service.h"
+#include"step.h"
 // 外部声明已初始化的TIM句柄
 extern TIM_HandleTypeDef htim1;
 
-Motor motors[2]={0};
+Motor motors[3]={0};
 MotorRepo*    motorRepo=NULL;
 MotorService* motorSrv=NULL;
 
@@ -22,7 +23,7 @@ int MotorInit(){
     sConfigOC.Pulse = 0;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-
+    InitStepMotor(&motors[0],0);
     // ========== Servo 0: PE9 (TIM1_CH1) ==========
     PWM* pwm0 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_1);
     if(pwm0 == NULL) return 1;
@@ -31,8 +32,8 @@ int MotorInit(){
     if(servo0 == NULL) return 2;
     
     MotorInterface interface0 = ServoInterface();
-    motors[0].instance = servo0;
-    motors[0].interface = interface0;
+    motors[1].instance = servo0;
+    motors[1].interface = interface0;
 
     // ========== Servo 1: PE11 (TIM1_CH2) ==========
     PWM* pwm1 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_2);
@@ -42,8 +43,8 @@ int MotorInit(){
     if(servo1 == NULL) return 4;
     
     MotorInterface interface1 = ServoInterface();
-    motors[1].instance = servo1;
-    motors[1].interface = interface1;
+    motors[2].instance = servo1;
+    motors[2].interface = interface1;
 
     // ========== 创建 MotorRepo ==========
     MotorRepo* repo = NewMotorReop(motors, 2); // 2个电机
