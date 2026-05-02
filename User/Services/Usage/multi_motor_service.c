@@ -16,6 +16,7 @@ MotorResult MultiMotorExec(void* service, void* arg) {
     
     MultiMotorService* multiSvc = (MultiMotorService*)service;
     MultiMotorDomain* multiDomain = (MultiMotorDomain*)arg;
+    void* repo = multiSvc->repo;
     
     // 获取电机数量
     int nums = multiDomain->nums;
@@ -29,22 +30,67 @@ MotorResult MultiMotorExec(void* service, void* arg) {
     // 依次设置每个电机
     MotorResult finalResult = Success;
     for (int i = 0; i < nums; i++) {
-        MotorResult result = (MotorResult)MotorExec(
-            multiSvc->motorService, 
-            &motorDomains[i]
-        );
+        MotorDomain* domain = &motorDomains[i];
+        int id = domain->id;
         
-        // 记录第一个错误结果
-        if (result != Success && finalResult == Success) {
-            finalResult = result;
+        // ① 检查电机是否存在
+        if (!multiSvc->interface.isMotorExists(repo, id)) {
+            if (finalResult == Success) {
+                finalResult = NoSuchDev;
+            }
+            continue;
+        }
+        
+        // ② 根据电源状态操作
+        if (domain->powerOn) {
+            if (!multiSvc->interface.powerOn(repo, id)) {
+                if (finalResult == Success) {
+                    finalResult = Fail;
+                }
+                continue;
+            }
+        } else {
+            if (!multiSvc->interface.shutOff(repo, id)) {
+                if (finalResult == Success) {
+                    finalResult = Fail;
+                }
+            }
+            continue;
+        }
+        
+        // ③ 根据模式执行相应操作
+        char result = 0;
+        switch (domain->mode) {
+            case PositionAngelMode:
+                result = multiSvc->interface.setPosition(repo, id,
+                    domain->numAngel, domain->denAngel, domain->maxAngel);
+                break;
+            case PositionEncodeMode:
+                result = multiSvc->interface.setPositionByEncode(repo, id, domain->encode);
+                break;
+            case SpeedEncodeMode:
+                result = multiSvc->interface.setPwm(repo, id, domain->pwmNum, domain->pwmDen);
+                break;
+            case SpeedAngelMode:
+                result = multiSvc->interface.setSpeedByAngel(repo, id, domain->spNumAngel, domain->spDenAngel);
+                break;
+            default:
+                if (finalResult == Success) {
+                    finalResult = ArgErr;
+                }
+                continue;
+        }
+        
+        if (!result && finalResult == Success) {
+            finalResult = Fail;
         }
     }
     
     return finalResult;
 }
 
-MultiMotorService* NewMultiMotorService(MotorService* motorService) {
-    if (motorService == NULL) {
+MultiMotorService* NewMultiMotorService(void* repo, MultiMotorRepoInterface interface) {
+    if (repo == NULL) {
         return NULL;
     }
     
@@ -53,6 +99,7 @@ MultiMotorService* NewMultiMotorService(MotorService* motorService) {
         return NULL;
     }
     
-    service->motorService = motorService;
+    service->repo = repo;
+    service->interface = interface;
     return service;
 }

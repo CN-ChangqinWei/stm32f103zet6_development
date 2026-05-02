@@ -57,8 +57,17 @@ int MotorInit(){
     motorSrv = NewMotorService(repo, repo->interface);
     if(motorSrv == NULL) return 5;
     
-    // ========== 创建 MultiMotorService ==========
-    multiMotorSrv = NewMultiMotorService(motorSrv);
+    // ========== 创建 MultiMotorService (复用 motorRepo) ==========
+    MultiMotorRepoInterface multiInterface = {
+        .isMotorExists = (char (*)(void*, int))isMotorExsits,
+        .setPosition = (char (*)(void*, int, uint32_t, uint32_t, uint32_t))setPosition,
+        .setPositionByEncode = (char (*)(void*, int, int))setPositionByEncode,
+        .setPwm = (char (*)(void*, int, int, int))setPwm,
+        .setSpeedByAngel = (char (*)(void*, int, int, int))setSpeedByAngel,
+        .powerOn = (char (*)(void*, int))powerOn,
+        .shutOff = (char (*)(void*, int))shutOff
+    };
+    multiMotorSrv = NewMultiMotorService(repo, multiInterface);
     if(multiMotorSrv == NULL) return 6;
     
     return 0;
@@ -81,8 +90,8 @@ void GlobalInit(){
     SerivceInit();
     int err=0;
     if(err=MotorInit()){
-        ServiceComm("motor init fail\n",strlen("motor init fail\n"));
-        ServiceComm((char*)&err,sizeof(err));
+        // ServiceComm("motor init fail\n",strlen("motor init fail\n"));
+        // ServiceComm((char*)&err,sizeof(err));
         return;
     }else{
         //ServiceComm("motor init fin\n",strlen("motor init fin\n"));
