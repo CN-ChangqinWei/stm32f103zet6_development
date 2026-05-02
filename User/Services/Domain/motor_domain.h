@@ -40,7 +40,7 @@ typedef struct{
 
 typedef struct{
     int protocol;
-    int res;
+    MotorResult res;
 }MotorDomainReply;
 
 #endif
