@@ -3,6 +3,8 @@
 #include"motor_repo.h"
 #include"motor_service.h"
 #include"motor_comm.h"
+#include"multi_motor_service.h"
+#include"multi_motor_comm.h"
 #include "router.h"
 #include"servo.h"
 #include"pwm.h"
@@ -15,6 +17,7 @@ extern TIM_HandleTypeDef htim1;
 Motor motors[3]={0};
 MotorRepo*    motorRepo=NULL;
 MotorService* motorSrv=NULL;
+MultiMotorService* multiMotorSrv=NULL;
 
 int MotorInit(){
     // TIM_OC_InitTypeDef 配置 (标准PWM模式，已默认配置)
@@ -52,6 +55,12 @@ int MotorInit(){
 
     // ========== 创建 MotorService ==========
     motorSrv = NewMotorService(repo, repo->interface);
+    if(motorSrv == NULL) return 5;
+    
+    // ========== 创建 MultiMotorService ==========
+    multiMotorSrv = NewMultiMotorService(motorSrv);
+    if(multiMotorSrv == NULL) return 6;
+    
     return 0;
 }
 
@@ -59,6 +68,10 @@ void RoutesInit(){
    
    RouterHandlerPkg motorHandler={MotorHandler,motorSrv};
    RouterRegister(PROTO_MOTOR, motorHandler);
+   
+   RouterHandlerPkg multiMotorHandler={MultiMotorHandler,multiMotorSrv};
+   RouterRegister(PROTO_MULTI_MOTOR, multiMotorHandler);
+   
    #ifdef _DEBUG
    ServiceComm("motor service init fin\n",strlen("motor service init fin\n"));
    #endif
