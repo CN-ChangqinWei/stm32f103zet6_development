@@ -8,11 +8,16 @@
 #include "router.h"
 #include"servo.h"
 #include"pwm.h"
+#include"plus.h"
 #include"stm32f1xx_hal.h"
 #include"service.h"
 #include"step.h"
 // 外部声明已初始化的TIM句柄
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim5;
+
+
 
 Motor motors[3]={0};
 MotorRepo*    motorRepo=NULL;
@@ -26,13 +31,29 @@ int MotorInit(){
     sConfigOC.Pulse = 0;
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    InitStepMotor(&motors[0],0);
+    
+    // ========== Step Motor 0: htim2/htim5, PE12(dir), PE13(en) ==========
+    // 初始角度 90/180 * 180 = 90度, 步进角 1/100 * 180 = 1.8度
+    Plus* plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_1);
+    if(plus0 == NULL) return 1;
+    
+    Motor* stepMotor0 = NewStepMotor(0, plus0, 
+                                      90, 180,      // 初始角度 90/180
+                                      1, 400,       // 步进角 1/100 * 180 = 1.8度
+                                      180,          // 最大角度180
+                                      GPIOE, GPIO_PIN_12, 1,  // 方向 PE12, 极性+1
+                                      GPIOE, GPIO_PIN_13, 1); // 使能 PE13, 高电平有效
+    if(stepMotor0 == NULL) return 2;
+    
+    motors[0].instance = stepMotor0->instance;
+    motors[0].interface = stepMotor0->interface;
+    
     // ========== Servo 0: PE9 (TIM1_CH1) ==========
     PWM* pwm0 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_1);
-    if(pwm0 == NULL) return 1;
+    if(pwm0 == NULL) return 3;
     
     Servo* servo0 = NewServo(NULL, 0, pwm0); // 无电源控制线
-    if(servo0 == NULL) return 2;
+    if(servo0 == NULL) return 4;
     
     MotorInterface interface0 = ServoInterface();
     motors[1].instance = servo0;
@@ -40,22 +61,22 @@ int MotorInit(){
 
     // ========== Servo 1: PE11 (TIM1_CH2) ==========
     PWM* pwm1 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_2);
-    if(pwm1 == NULL) return 3;
+    if(pwm1 == NULL) return 5;
     
     Servo* servo1 = NewServo(NULL, 0, pwm1); // 无电源控制线
-    if(servo1 == NULL) return 4;
+    if(servo1 == NULL) return 6;
     
     MotorInterface interface1 = ServoInterface();
     motors[2].instance = servo1;
     motors[2].interface = interface1;
 
     // ========== 创建 MotorRepo ==========
-    MotorRepo* repo = NewMotorReop(motors, 3); // 2个电机
-    if(repo == NULL) return 5;
+    MotorRepo* repo = NewMotorReop(motors, 3); // 3个电机
+    if(repo == NULL) return 7;
 
     // ========== 创建 MotorService ==========
     motorSrv = NewMotorService(repo, repo->interface);
-    if(motorSrv == NULL) return 5;
+    if(motorSrv == NULL) return 8;
     
     // ========== 创建 MultiMotorService (复用 motorRepo) ==========
     MultiMotorRepoInterface multiInterface = {
@@ -68,7 +89,7 @@ int MotorInit(){
         .shutOff = (char (*)(void*, int))shutOff
     };
     multiMotorSrv = NewMultiMotorService(repo, multiInterface);
-    if(multiMotorSrv == NULL) return 6;
+    if(multiMotorSrv == NULL) return 9;
     
     return 0;
 }

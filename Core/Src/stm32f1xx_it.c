@@ -25,6 +25,8 @@
 #include "serial.h"
 #include "service.h"
 #include "stm32f1xx_hal_gpio.h"
+#include "stm32f1xx_hal_tim.h"
+#include "step.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,7 +67,7 @@ extern UART_HandleTypeDef huart2;
 extern TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN EV */
-
+extern Motor motors[3];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -259,5 +261,4 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
     }
 }
 #endif
-
 /* USER CODE END 1 */

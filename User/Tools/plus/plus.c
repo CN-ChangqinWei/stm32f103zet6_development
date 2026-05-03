@@ -28,12 +28,21 @@ static int StopMasterPWM(Plus* plus) {
 }
 
 /**
- * @brief 启动从定时器计数（外部时钟模式）
+ * @brief 启动从定时器计数（外部时钟模式）带中断
  */
-static int StartSlaveCounter(Plus* plus) {
+static int StartSlaveCounter_IT(Plus* plus) {
     if (plus == NULL || plus->timSlave == NULL) return -1;
     
-    if (HAL_TIM_Base_Start(plus->timSlave) != HAL_OK) {
+    // 清除更新中断标志
+    __HAL_TIM_CLEAR_FLAG(plus->timSlave, TIM_FLAG_UPDATE);
+    
+    // 使能更新中断
+    __HAL_TIM_ENABLE_IT(plus->timSlave, TIM_IT_UPDATE);
+    
+    // 启动从定时器（带中断）
+    if (HAL_TIM_Base_Start_IT(plus->timSlave) != HAL_OK) {
+        // 启动失败，禁用中断
+        __HAL_TIM_DISABLE_IT(plus->timSlave, TIM_IT_UPDATE);
         return -1;
     }
     return 0;
@@ -45,9 +54,17 @@ static int StartSlaveCounter(Plus* plus) {
 static int StopSlaveCounter(Plus* plus) {
     if (plus == NULL || plus->timSlave == NULL) return -1;
     
-    if (HAL_TIM_Base_Stop(plus->timSlave) != HAL_OK) {
+    // 停止定时器
+    if (HAL_TIM_Base_Stop_IT(plus->timSlave) != HAL_OK) {
         return -1;
     }
+    
+    // 禁用更新中断
+    __HAL_TIM_DISABLE_IT(plus->timSlave, TIM_IT_UPDATE);
+    
+    // 清除更新中断标志
+    __HAL_TIM_CLEAR_FLAG(plus->timSlave, TIM_FLAG_UPDATE);
+    
     return 0;
 }
 
@@ -130,8 +147,8 @@ int PlusSend(Plus* plus, uint16_t count) {
     // 释放锁
     xSemaphoreGive(plus->lock);
     
-    // 启动从定时器（必须先启动，准备接收脉冲）
-    if (StartSlaveCounter(plus) != 0) {
+    // 启动从定时器中断模式（必须先启动，准备接收脉冲）
+    if (StartSlaveCounter_IT(plus) != 0) {
         plus->isRunning = 0;
         return -1;
     }
