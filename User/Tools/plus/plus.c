@@ -4,11 +4,33 @@
 // ========== 静态辅助函数 ==========
 
 /**
- * @brief 启动主定时器PWM
+ * @brief 启动主定时器PWM，设置占空比为50%
  */
 static int StartMasterPWM(Plus* plus) {
     if (plus == NULL || plus->timMaster == NULL) return -1;
+
+    // 获取ARR值并设置占空比为50%
+    uint32_t arr = __HAL_TIM_GET_AUTORELOAD(plus->timMaster);
+    uint32_t pulse = arr / 2;
     
+    // 设置对应通道的compare值为ARR的一半（50%占空比）
+    switch (plus->masterChannel) {
+        case TIM_CHANNEL_1:
+            __HAL_TIM_SET_COMPARE(plus->timMaster, TIM_CHANNEL_1, pulse);
+            break;
+        case TIM_CHANNEL_2:
+            __HAL_TIM_SET_COMPARE(plus->timMaster, TIM_CHANNEL_2, pulse);
+            break;
+        case TIM_CHANNEL_3:
+            __HAL_TIM_SET_COMPARE(plus->timMaster, TIM_CHANNEL_3, pulse);
+            break;
+        case TIM_CHANNEL_4:
+            __HAL_TIM_SET_COMPARE(plus->timMaster, TIM_CHANNEL_4, pulse);
+            break;
+        default:
+            return -1;
+    }
+
     if (HAL_TIM_PWM_Start(plus->timMaster, plus->masterChannel) != HAL_OK) {
         return -1;
     }

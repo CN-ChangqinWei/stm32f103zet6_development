@@ -34,7 +34,7 @@ int MotorInit(){
     
     // ========== Step Motor 0: htim2/htim5, PE12(dir), PE13(en) ==========
     // 初始角度 90/180 * 180 = 90度, 步进角 1/100 * 180 = 1.8度
-    Plus* plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_1);
+    Plus* plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_2);
     if(plus0 == NULL) return 1;
     
     Motor* stepMotor0 = NewStepMotor(0, plus0, 
