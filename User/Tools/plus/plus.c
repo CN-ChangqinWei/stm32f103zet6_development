@@ -1,13 +1,14 @@
 #include "plus.h"
 #include "portable.h"
-
+#include "service.h"
+#include <stdio.h>
 // ========== 静态辅助函数 ==========
 
 /**
- * @brief 启动主定时器PWM，设置占空比为50%
+ * @brief 启动主定时器PWM
  */
 static int StartMasterPWM(Plus* plus) {
-    if (plus == NULL || plus->timMaster == NULL) return -1;
+     if (plus == NULL || plus->timMaster == NULL) return -1;
 
     // 获取ARR值并设置占空比为50%
     uint32_t arr = __HAL_TIM_GET_AUTORELOAD(plus->timMaster);
@@ -30,7 +31,6 @@ static int StartMasterPWM(Plus* plus) {
         default:
             return -1;
     }
-
     if (HAL_TIM_PWM_Start(plus->timMaster, plus->masterChannel) != HAL_OK) {
         return -1;
     }
@@ -112,11 +112,11 @@ Plus* NewPlus(TIM_HandleTypeDef* timMaster, TIM_HandleTypeDef* timSlave, uint32_
     plus->isRunning = 0;
     
     // 创建FreeRTOS互斥锁
-    plus->lock = xSemaphoreCreateMutex();
-    if (plus->lock == NULL) {
-        vPortFree(plus);
-        return NULL;
-    }
+    // plus->lock = xSemaphoreCreateMutex();
+    // if (plus->lock == NULL) {
+    //     vPortFree(plus);
+    //     return NULL;
+    // }
     
     return plus;
 }
@@ -131,9 +131,9 @@ void DeletePlus(Plus* plus) {
     }
     
     // 删除互斥锁
-    if (plus->lock != NULL) {
-        vSemaphoreDelete(plus->lock);
-    }
+    // if (plus->lock != NULL) {
+    //     vSemaphoreDelete(plus->lock);
+    // }
     
     vPortFree(plus);
 }
@@ -142,19 +142,20 @@ void DeletePlus(Plus* plus) {
 
 int PlusSend(Plus* plus, uint16_t count) {
     if (plus == NULL || count == 0) return -1;
-    
     if(plus->isRunning) return 1;
-
+    // char msg[50]={0};
+    // sprintf(msg,"cnt is %d\n",count);
+    // ServiceComm(msg,strlen(msg));
     // 获取锁，检查运行状态
-    if (xSemaphoreTake(plus->lock, portMAX_DELAY) != pdTRUE) {
-        return -1;
-    }
+    // if (xSemaphoreTake(plus->lock, portMAX_DELAY) != pdTRUE) {
+    //     return -1;
+    // }
     
-    // 如果正在运行，直接返回非0
-    if (plus->isRunning) {
-        xSemaphoreGive(plus->lock);
-        return 1;
-    }
+    // // 如果正在运行，直接返回非0
+    // if (plus->isRunning) {
+    //     xSemaphoreGive(plus->lock);
+    //     return 1;
+    // }
     
     // 设置从定时器ARR（脉冲计数目标）
     // 注意：STM32 ARR是0-based，所以count-1
@@ -167,7 +168,7 @@ int PlusSend(Plus* plus, uint16_t count) {
     plus->isRunning = 1;
     
     // 释放锁
-    xSemaphoreGive(plus->lock);
+    //xSemaphoreGive(plus->lock);
     
     // 启动从定时器中断模式（必须先启动，准备接收脉冲）
     if (StartSlaveCounter_IT(plus) != 0) {
@@ -189,9 +190,9 @@ int PlusStop(Plus* plus) {
     if (plus == NULL) return -1;
     
     // 获取锁
-    if (xSemaphoreTake(plus->lock, portMAX_DELAY) != pdTRUE) {
-        return -1;
-    }
+    // if (xSemaphoreTake(plus->lock, portMAX_DELAY) != pdTRUE) {
+    //     return -1;
+    // }
     
     // 停止主定时器PWM
     StopMasterPWM(plus);
@@ -206,7 +207,7 @@ int PlusStop(Plus* plus) {
     plus->isRunning = 0;
     
     // 释放锁
-    xSemaphoreGive(plus->lock);
+    //xSemaphoreGive(plus->lock);
     
     return 0;
 }
@@ -217,10 +218,10 @@ int PlusIsRunning(Plus* plus) {
     int running = 0;
     
     // 获取锁，读取状态
-    if (xSemaphoreTake(plus->lock, portMAX_DELAY) == pdTRUE) {
+    // if (xSemaphoreTake(plus->lock, portMAX_DELAY) == pdTRUE) {
         running = plus->isRunning;
-        xSemaphoreGive(plus->lock);
-    }
+    //     xSemaphoreGive(plus->lock);
+    // }
     
     return running;
 }

@@ -66,7 +66,7 @@ static int CalculateSteps(int targetNum, int targetDen,
     //       = (diffNum/diffDen * maxAngel) / (stepNum/stepDen)
     //       = diffNum * maxAngel * stepDen / (diffDen * stepNum)
     
-    int64_t steps = diffNum * (int64_t)maxAngel * stepDen / (diffDen * stepNum);
+    int64_t steps = diffNum * stepDen / (diffDen * stepNum);
     
     return (int)steps;
 }

@@ -23,7 +23,7 @@ Motor motors[3]={0};
 MotorRepo*    motorRepo=NULL;
 MotorService* motorSrv=NULL;
 MultiMotorService* multiMotorSrv=NULL;
-
+Plus* plus0=NULL;
 int MotorInit(){
     // TIM_OC_InitTypeDef 配置 (标准PWM模式，已默认配置)
     TIM_OC_InitTypeDef sConfigOC = {0};
@@ -34,7 +34,7 @@ int MotorInit(){
     
     // ========== Step Motor 0: htim2/htim5, PE12(dir), PE13(en) ==========
     // 初始角度 90/180 * 180 = 90度, 步进角 1/100 * 180 = 1.8度
-    Plus* plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_2);
+    plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_2);
     if(plus0 == NULL) return 1;
     
     Motor* stepMotor0 = NewStepMotor(0, plus0, 
@@ -42,7 +42,7 @@ int MotorInit(){
                                       1, 400,       // 步进角 1/100 * 180 = 1.8度
                                       180,          // 最大角度180
                                       GPIOE, GPIO_PIN_12, 1,  // 方向 PE12, 极性+1
-                                      GPIOE, GPIO_PIN_13, 1); // 使能 PE13, 高电平有效
+                                      GPIOE, GPIO_PIN_13, 0); // 使能 PE13, 高电平有效
     if(stepMotor0 == NULL) return 2;
     
     motors[0].instance = stepMotor0->instance;

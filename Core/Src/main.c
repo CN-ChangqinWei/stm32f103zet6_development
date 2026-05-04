@@ -61,7 +61,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 osThreadId defaultTaskHandle;
 osThreadId CommunicationHandle;
 /* USER CODE BEGIN PV */
-
+extern Plus* plus0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -309,7 +309,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
+  htim2.Init.Prescaler = 10-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 7200-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -436,7 +436,7 @@ static void MX_TIM5_Init(void)
     Error_Handler();
   }
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
-  sSlaveConfig.InputTrigger = TIM_TS_ITR1;
+  sSlaveConfig.InputTrigger = TIM_TS_ITR0;
   if (HAL_TIM_SlaveConfigSynchro(&htim5, &sSlaveConfig) != HAL_OK)
   {
     Error_Handler();
@@ -635,7 +635,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if(htim==&htim5){
+    PlusStop(plus0);
+    // const char msg[]="plus stop";
+    // ServiceComm(msg,strlen(msg));
+  }
   /* USER CODE END Callback 1 */
 }
 

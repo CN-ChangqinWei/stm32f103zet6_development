@@ -5,8 +5,8 @@
 #include "serial.h"
 #include "motor_repo.h"
 #include "motor_service.h"
-static Service service={0};
-static SerialComm* serialComm=NULL;
+Service service={0};
+SerialComm* serialComm=NULL;
 void SerivceInit(){
     
     SerialsInit();
@@ -44,8 +44,5 @@ void ServiceComm(char* buf,int len){
     CommSendPackage(service.listener,buf,len);
 }
 uint16_t ServiceErrHandler(void*instance,void* arg){
-    char msg[60]={0};
-    sprintf(msg,"errhandler:%s",(char*)arg);
-    CommSendPackage(service.listener,msg, strlen(msg));
     return 0;
 }
