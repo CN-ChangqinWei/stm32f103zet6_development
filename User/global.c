@@ -41,7 +41,7 @@ int MotorInit(){
                                       90, 180,      // 初始角度 90/180
                                       1, 400,       // 步进角 1/100 * 180 = 1.8度
                                       180,          // 最大角度180
-                                      GPIOE, GPIO_PIN_12, 1,  // 方向 PE12, 极性+1
+                                      GPIOE, GPIO_PIN_12, -1,  // 方向 PE12, 极性+1
                                       GPIOE, GPIO_PIN_13, 0); // 使能 PE13, 高电平有效
     if(stepMotor0 == NULL) return 2;
     
@@ -90,7 +90,9 @@ int MotorInit(){
     };
     multiMotorSrv = NewMultiMotorService(repo, multiInterface);
     if(multiMotorSrv == NULL) return 9;
-    
+    motors[0].interface.setPosition(motors[0].instance,90,180,180);
+    motors[1].interface.setPosition(motors[1].instance,45,180,180);
+    motors[2].interface.setPosition(motors[2].instance,45,180,180);
     return 0;
 }
 
