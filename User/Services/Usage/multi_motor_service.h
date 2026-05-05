@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "multi_motor_domain.h"
 #include "motor_domain.h"
-
+#include "task_que.h"
 // ========== 批量操作 Repository 接口表（抽象） ==========
 typedef struct {
     char (*isMotorExists)(void* repo, int id);
@@ -20,6 +20,7 @@ typedef struct {
 typedef struct {
     void* repo;                           // 指向仓储实例
     MultiMotorRepoInterface interface;    // 仓储接口表
+    TaskQue* tk;
 } MultiMotorService;
 
 // ========== 构造函数 + 业务入口 ==========

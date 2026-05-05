@@ -1,34 +1,21 @@
 #include "multi_motor_service.h"
 #include "portable.h"
+#include<string.h>
+typedef struct{
+    int len;
+    MotorDomain * domains;
+}MultiMotorPackage;
 
-/**
- * @brief 批量电机控制执行
- * @note 数据包格式: MultiMotorDomain + nums个MotorDomain
- * 
- * @param service MultiMotorService实例
- * @param arg 数据包指针 (MultiMotorDomain + MotorDomain数组)
- * @return MotorResult 执行结果
- */
-MotorResult MultiMotorExec(void* service, void* arg) {
-    if (service == NULL || arg == NULL) {
-        return ArgErr;
-    }
-    
-    MultiMotorService* multiSvc = (MultiMotorService*)service;
-    MultiMotorDomain* multiDomain = (MultiMotorDomain*)arg;
+static void MultiMotorSet(MultiMotorService* multiSvc,MotorDomain* motorDomains,int nums);
+
+static void MultiMotorSet(MultiMotorService* multiSvc,MotorDomain* motorDomains,int nums){
     void* repo = multiSvc->repo;
-    
+    MotorResult finalResult;
     // 获取电机数量
-    int nums = multiDomain->nums;
+    
     if (nums <= 0) {
-        return ArgErr;
+        return ;
     }
-    
-    // 计算MotorDomain数组的起始地址 (紧跟在MultiMotorDomain后面)
-    MotorDomain* motorDomains = (MotorDomain*)((uint8_t*)arg + sizeof(MultiMotorDomain));
-    
-    // 依次设置每个电机
-    MotorResult finalResult = Success;
     for (int i = 0; i < nums; i++) {
         MotorDomain* domain = &motorDomains[i];
         int id = domain->id;
@@ -85,8 +72,51 @@ MotorResult MultiMotorExec(void* service, void* arg) {
             finalResult = Fail;
         }
     }
+}
+
+uint16_t MotorExecDelay(void *instance,void * data){
+    if(NULL==instance||NULL==data) return 0;
+    MultiMotorPackage* package =(MultiMotorPackage*)data;
+    for(int i=0;i<package->len;i++){
+        MultiMotorSet((MultiMotorService*)instance,package->domains,package->len);
+    }
+    vPortFree(package->domains);
+    osDelay(2000);
+}
+
+
+
+/**
+ * @brief 批量电机控制执行
+ * @note 数据包格式: MultiMotorDomain + nums个MotorDomain
+ * 
+ * @param service MultiMotorService实例
+ * @param arg 数据包指针 (MultiMotorDomain + MotorDomain数组)
+ * @return MotorResult 执行结果
+ */
+MotorResult MultiMotorExec(void* service, void* arg) {
+    if (service == NULL || arg == NULL) {
+        return ArgErr;
+    }
     
-    return finalResult;
+    MultiMotorService* multiSvc = (MultiMotorService*)service;
+    MultiMotorDomain* multiDomain = (MultiMotorDomain*)arg;
+   
+    
+    // 计算MotorDomain数组的起始地址 (紧跟在MultiMotorDomain后面)
+    MotorDomain* motorDomains = (MotorDomain*)((uint8_t*)arg + sizeof(MultiMotorDomain));
+    MultiMotorPackage* pkg = pvPortMalloc(sizeof(MultiMotorPackage));
+    pkg->len = multiDomain->nums;
+    pkg->domains = pvPortMalloc(sizeof(MotorDomain)*pkg->len);
+    memcpy(pkg->domains,motorDomains,sizeof(MotorDomain)*pkg->len);
+    TaskPackage task ={
+        .func=MotorExecDelay,
+        .data=pkg,
+        .instance=service
+    };
+    TaskQueAdd(multiSvc->tk,task);
+    
+    return Success;
 }
 
 MultiMotorService* NewMultiMotorService(void* repo, MultiMotorRepoInterface interface) {
@@ -101,5 +131,9 @@ MultiMotorService* NewMultiMotorService(void* repo, MultiMotorRepoInterface inte
     
     service->repo = repo;
     service->interface = interface;
+    service->tk=NewTaskQue(100);
+    TaskQueStart(service->tk,0);
     return service;
 }
+
+
