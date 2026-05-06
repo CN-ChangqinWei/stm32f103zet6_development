@@ -4,7 +4,7 @@
 #include "stm32f1xx_hal.h"
 #include "ring_buf.h"
 #include"cmsis_os.h"
-#define _SERIAL_BUF_SIZE    255
+#define _SERIAL_BUF_SIZE    1024
 #define _SERIAL_DMA_BUF_SIZE    1024
 typedef struct{
     UART_HandleTypeDef* uart;
@@ -28,7 +28,7 @@ typedef struct{
 
 } Serial ;
 extern Serial* serial1;
-extern uint8_t sendBuf1[255];
+extern uint8_t sendBuf1[_SERIAL_BUF_SIZE];
 Serial* NewSerial(UART_HandleTypeDef* uart,
     int       recvBufSize,
     uint8_t * sendBuf,

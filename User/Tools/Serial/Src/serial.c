@@ -55,7 +55,7 @@ void DeleteSerial(Serial* serial){
 }
 
 uint8_t SerialsInit(){
-    serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, 255, 0, &hdma_usart2_rx);
+    serial1 = NewSerial(&huart2,_SERIAL_BUF_SIZE,sendBuf1, _SERIAL_BUF_SIZE, 0, &hdma_usart2_rx);
     if(serial1 == NULL) return 1;
     //SerialStartRecvIT(serial1);
     SerialStartRecvDMA(serial1);
