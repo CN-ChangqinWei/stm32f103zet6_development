@@ -34,19 +34,21 @@ int MotorInit(){
     
     // ========== Step Motor 0: htim2/htim5, PE12(dir), PE13(en) ==========
     // 初始角度 90/180 * 180 = 90度, 步进角 1/100 * 180 = 1.8度
-    plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_2);
-    if(plus0 == NULL) return 1;
+    // plus0 = NewPlus(&htim2, &htim5, TIM_CHANNEL_2);
+    // if(plus0 == NULL) return 1;
     
-    Motor* stepMotor0 = NewStepMotor(0, plus0, 
-                                      90, 180,      // 初始角度 90/180
-                                      1, 400,       // 步进角 1/100 * 180 = 1.8度
-                                      180,          // 最大角度180
-                                      GPIOE, GPIO_PIN_12, -1,  // 方向 PE12, 极性+1
-                                      GPIOE, GPIO_PIN_13, 0); // 使能 PE13, 高电平有效
-    if(stepMotor0 == NULL) return 2;
-    
-    motors[0].instance = stepMotor0->instance;
-    motors[0].interface = stepMotor0->interface;
+    // Motor* stepMotor0 = NewStepMotor(0, plus0, 
+    //                                   90, 180,      // 初始角度 90/180
+    //                                   1, 400,       // 步进角 1/100 * 180 = 1.8度
+    //                                   180,          // 最大角度180
+    //                                   GPIOE, GPIO_PIN_12, -1,  // 方向 PE12, 极性+1
+    //                                   GPIOE, GPIO_PIN_13, 0); // 使能 PE13, 高电平有效
+    // if(stepMotor0 == NULL) return 2;
+    PWM* pwm2 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_4);
+    Servo* servo2 = NewServo(NULL, 0, pwm2); // 无电源控制线
+    if(servo2 == NULL) return 4;
+    motors[0].instance=servo2;
+    motors[0].interface=ServoInterface();
     
     // ========== Servo 0: PE9 (TIM1_CH1) ==========
     PWM* pwm0 = NewPWM(&htim1, sConfigOC, TIM_CHANNEL_1);
