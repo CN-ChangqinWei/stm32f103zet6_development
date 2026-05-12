@@ -18,6 +18,7 @@ set(USER_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Services/Internal/repository
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/Step/Inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/task_que/inc
 )
 
 set(USER_Application_Src
@@ -46,6 +47,7 @@ set(USER_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/global.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Peripherals/Motor/Step/Src/step.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/plus/plus.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../User/Tools/task_que/src/task_que.c
     
 )
 
